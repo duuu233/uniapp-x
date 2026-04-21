@@ -12,3 +12,22 @@ export function openRoute(route: string): void {
     url: route,
   })
 }
+
+export function replaceRoute(route: string): void {
+  if (isTabRoute(route)) {
+    uni.switchTab({
+      url: route,
+    })
+    return
+  }
+
+  uni.redirectTo({
+    url: route,
+  })
+}
+
+export function relaunchRoute(route: string): void {
+  uni.reLaunch({
+    url: route,
+  })
+}

@@ -1,4 +1,5 @@
 import { getBindPageDataMock, getDevicePageDataMock } from '@/src/mock/device.uts'
+import { createTimeLabel, getMockState } from '@/src/mock/state.uts'
 import { request } from '@/src/network/http.uts'
 import { BindPageData, DevicePageData } from '@/src/types/models.uts'
 
@@ -15,5 +16,237 @@ export function fetchDevicePageData(): Promise<DevicePageData> {
     path: '/devices',
     method: 'GET',
     mockData: getDevicePageDataMock(),
+  })
+}
+
+export function bindDeviceByScan(): Promise<string> {
+  return new Promise<string>((resolve) => {
+    const state = getMockState()
+    setTimeout(() => {
+      state.devices.push({
+        id: 'device-scan-' + Date.now().toString(),
+        name: '扫码接入设备',
+        location: '新接入设备区',
+        status: '在线',
+        statusTone: 'success',
+        connection: '扫码绑定 / Wi-Fi',
+        battery: '外接电源',
+        updatedAt: createTimeLabel(),
+        ownerName: state.profile.displayName,
+        permissionLabel: '所有者',
+        serialNumber: 'SCAN-' + Date.now().toString().substring(7),
+        connected: false,
+        carouselEnabled: false,
+        memoryLabel: '剩余 56%',
+        typeLabel: '新接入设备',
+        canReuseSn: true,
+      })
+      resolve('已完成扫码绑定，可前往我的设备查看')
+    }, 260)
+  })
+}
+
+export function bindDeviceByBluetooth(): Promise<string> {
+  return new Promise<string>((resolve) => {
+    const state = getMockState()
+    setTimeout(() => {
+      state.devices.push({
+        id: 'device-bt-' + Date.now().toString(),
+        name: '蓝牙发现设备',
+        location: '近场设备区',
+        status: '在线',
+        statusTone: 'primary',
+        connection: '蓝牙发现 / 5G',
+        battery: '82%',
+        updatedAt: createTimeLabel(),
+        ownerName: state.profile.displayName,
+        permissionLabel: '使用者',
+        serialNumber: 'BT-' + Date.now().toString().substring(7),
+        connected: false,
+        carouselEnabled: false,
+        memoryLabel: '剩余 61%',
+        typeLabel: '移动终端',
+        canReuseSn: true,
+      })
+      resolve('已发现并绑定附近设备')
+    }, 260)
+  })
+}
+
+export function bindDeviceManually(serialNumber: string, deviceName: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    if (serialNumber.trim().length < 4) {
+      reject('SN 码至少 4 位')
+      return
+    }
+    if (deviceName.trim().length < 2) {
+      reject('设备名称至少 2 个字符')
+      return
+    }
+
+    const state = getMockState()
+    setTimeout(() => {
+      state.devices.push({
+        id: 'device-manual-' + Date.now().toString(),
+        name: deviceName.trim(),
+        location: '手动录入设备区',
+        status: '待授权',
+        statusTone: 'warning',
+        connection: '手动录入 / 待激活',
+        battery: '未知',
+        updatedAt: createTimeLabel(),
+        ownerName: state.profile.displayName,
+        permissionLabel: '所有者',
+        serialNumber: serialNumber.trim(),
+        connected: false,
+        carouselEnabled: false,
+        memoryLabel: '首次接入待检测',
+        typeLabel: '自定义设备',
+        canReuseSn: true,
+      })
+      resolve('已完成手动录入绑定')
+    }, 260)
+  })
+}
+
+export function connectDevice(deviceId: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+
+    setTimeout(() => {
+      for (const device of state.devices) {
+        device.connected = device.id == deviceId
+        if (device.connected) {
+          device.updatedAt = createTimeLabel()
+        }
+      }
+      resolve(getDevicePageDataMock())
+    }, 180)
+  })
+}
+
+export function renameDevice(deviceId: string, nextName: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    if (nextName.trim().length < 2) {
+      reject('设备名称至少 2 个字符')
+      return
+    }
+
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+
+    setTimeout(() => {
+      target.name = nextName.trim()
+      target.updatedAt = createTimeLabel()
+      resolve(getDevicePageDataMock())
+    }, 180)
+  })
+}
+
+export function updateDeviceOwner(deviceId: string, ownerName: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    if (ownerName.trim().length < 2) {
+      reject('所有者名称至少 2 个字符')
+      return
+    }
+
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+
+    setTimeout(() => {
+      target.ownerName = ownerName.trim()
+      target.updatedAt = createTimeLabel()
+      resolve(getDevicePageDataMock())
+    }, 180)
+  })
+}
+
+export function updateDevicePermission(deviceId: string, permissionLabel: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+
+    setTimeout(() => {
+      target.permissionLabel = permissionLabel
+      target.updatedAt = createTimeLabel()
+      resolve(getDevicePageDataMock())
+    }, 180)
+  })
+}
+
+export function updateDeviceSn(deviceId: string, serialNumber: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    if (serialNumber.trim().length < 4) {
+      reject('SN 码至少 4 位')
+      return
+    }
+
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+
+    setTimeout(() => {
+      target.serialNumber = serialNumber.trim()
+      target.updatedAt = createTimeLabel()
+      resolve(getDevicePageDataMock())
+    }, 180)
+  })
+}
+
+export function clearDeviceMemory(deviceId: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+    if (target.permissionLabel != '所有者') {
+      reject('仅设备所有者可执行一键清空')
+      return
+    }
+
+    setTimeout(() => {
+      target.memoryLabel = '已一键清空，剩余 100%'
+      target.updatedAt = createTimeLabel()
+      resolve(getDevicePageDataMock())
+    }, 180)
+  })
+}
+
+export function toggleDeviceCarousel(deviceId: string): Promise<DevicePageData> {
+  return new Promise<DevicePageData>((resolve, reject) => {
+    const state = getMockState()
+    const target = state.devices.find((item) => item.id == deviceId)
+    if (target == null) {
+      reject('设备不存在')
+      return
+    }
+
+    setTimeout(() => {
+      target.carouselEnabled = !target.carouselEnabled
+      target.updatedAt = createTimeLabel()
+      resolve(getDevicePageDataMock())
+    }, 180)
   })
 }

@@ -2,12 +2,17 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">GUIDE</text>
-        <text class="page-title">操作指南</text>
+        <text class="page-kicker">{{ $t('pages.guide.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.guide.title') }}</text>
         <text class="page-subtitle">{{ pageState.guide.summary }}</text>
+        <view class="tag-row">
+          <view v-for="category in pageState.guide.categories" :key="category" :class="pageState.activeCategory == category ? 'tag-chip tag-chip--active' : 'tag-chip'" @tap="selectCategory(category)">
+            <text :class="pageState.activeCategory == category ? 'tag-chip-text tag-chip-text--active' : 'tag-chip-text'">{{ category }}</text>
+          </view>
+        </view>
       </view>
 
-      <view v-for="section in pageState.guide.sections" :key="section.title" class="surface-card guide-card">
+      <view v-for="section in pageState.filteredSections" :key="section.title" class="surface-card guide-card">
         <text class="surface-title">{{ section.title }}</text>
         <text class="surface-subtitle">{{ section.description }}</text>
         <view v-for="point in section.points" :key="point" class="tip-row">
@@ -17,7 +22,7 @@
       </view>
 
       <view class="surface-card">
-        <text class="surface-title">联系支持</text>
+        <text class="surface-title">{{ $t('pages.guide.supportTitle') }}</text>
         <text class="surface-subtitle">{{ pageState.guide.contact }}</text>
       </view>
     </view>
@@ -25,17 +30,36 @@
 </template>
 
 <script setup lang="uts">
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
 import { fetchGuidePageData } from '@/src/services/system.uts'
-import { GuidePageData, createEmptyGuidePageData } from '@/src/types/models.uts'
+import { GuidePageData, GuideSection, createEmptyGuidePageData } from '@/src/types/models.uts'
 
 const pageState = reactive({
   loading: false,
   guide: createEmptyGuidePageData() as GuidePageData,
+  activeCategory: '全部',
+  filteredSections: [] as Array<GuideSection>,
 } as GuidePageState)
 
 type GuidePageState = {
   loading: boolean
   guide: GuidePageData
+  activeCategory: string
+  filteredSections: Array<GuideSection>
+}
+
+function refreshSections(): void {
+  if (pageState.activeCategory == '全部') {
+    pageState.filteredSections = pageState.guide.sections
+    return
+  }
+
+  pageState.filteredSections = pageState.guide.sections.filter((item) => item.category == pageState.activeCategory || item.category == '全部')
+}
+
+function selectCategory(category: string): void {
+  pageState.activeCategory = category
+  refreshSections()
 }
 
 async function loadGuide() {
@@ -45,23 +69,57 @@ async function loadGuide() {
     // const guideData = await fetchGuidePageData()
     const guideData = await fetchGuidePageData()
     pageState.guide = guideData
+    refreshSections()
   } catch (error) {
     uni.showToast({
-      title: '指南加载失败',
+      title: t('pages.guide.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-onLoad(() => {
+function refreshPage(): void {
+  applyPageTitle('nav.guide')
   loadGuide()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
 <style lang="scss">
 .guide-card {
   padding-top: 24rpx;
+}
+
+.tag-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+
+.tag-chip {
+  margin-right: 12rpx;
+  margin-bottom: 12rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background-color: rgba(31, 75, 78, 0.06);
+}
+
+.tag-chip--active {
+  background-color: $app-primary-soft;
+}
+
+.tag-chip-text {
+  font-size: 22rpx;
+  color: $app-primary;
+}
+
+.tag-chip-text--active {
+  color: $app-primary;
+  font-weight: 700;
 }
 
 .tip-row {

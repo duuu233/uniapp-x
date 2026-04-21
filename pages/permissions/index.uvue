@@ -2,12 +2,12 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">PERMISSIONS</text>
-        <text class="page-title">权限中心</text>
+        <text class="page-kicker">{{ $t('pages.permissions.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.permissions.title') }}</text>
         <text class="page-subtitle">{{ pageState.permission.summary }}</text>
       </view>
 
-      <AppSection eyebrow="授权状态" title="平台能力" subtitle="把权限检测收敛为统一入口，避免各页面散落平台判断">
+      <AppSection :eyebrow="$t('pages.permissions.platform.eyebrow')" :title="$t('pages.permissions.platform.title')" :subtitle="$t('pages.permissions.platform.subtitle')">
         <view v-for="item in pageState.permission.permissions" :key="item.title" class="permission-card">
           <view class="row-between">
             <text class="permission-title">{{ item.title }}</text>
@@ -23,7 +23,7 @@
       </AppSection>
 
       <view class="surface-card">
-        <text class="surface-title">封装建议</text>
+        <text class="surface-title">{{ $t('pages.permissions.suggestionTitle') }}</text>
         <text class="surface-subtitle">{{ pageState.permission.note }}</text>
       </view>
     </view>
@@ -32,6 +32,7 @@
 
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
 import { fetchPermissionPageData } from '@/src/services/system.uts'
 import { PermissionPageData, createEmptyPermissionPageData } from '@/src/types/models.uts'
 
@@ -54,7 +55,7 @@ async function loadPermissionData() {
     pageState.permission = permissionData
   } catch (error) {
     uni.showToast({
-      title: '权限数据加载失败',
+      title: t('pages.permissions.loadError'),
       icon: 'none',
     })
   }
@@ -68,8 +69,13 @@ function showHint(message: string): void {
   })
 }
 
-onLoad(() => {
+function refreshPage(): void {
+  applyPageTitle('nav.permissions')
   loadPermissionData()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 

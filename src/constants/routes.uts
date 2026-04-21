@@ -1,5 +1,8 @@
 export type RouteMap = {
   LOGIN: string
+  REGISTER: string
+  LOGOUT: string
+  DELETE_ACCOUNT: string
   HOME: string
   MINE: string
   ALBUM: string
@@ -11,10 +14,17 @@ export type RouteMap = {
   GUIDE: string
   SETTINGS: string
   PERMISSIONS: string
+  ABOUT: string
+  CONTACT: string
+  PRIVACY: string
+  AGREEMENT: string
 }
 
 export const ROUTES: RouteMap = {
   LOGIN: '/pages/login/index',
+  REGISTER: '/pages/register/index',
+  LOGOUT: '/pages/logout/index',
+  DELETE_ACCOUNT: '/pages/delete-account/index',
   HOME: '/pages/home/index',
   MINE: '/pages/mine/index',
   ALBUM: '/pages/album/index',
@@ -26,6 +36,10 @@ export const ROUTES: RouteMap = {
   GUIDE: '/pages/guide/index',
   SETTINGS: '/pages/settings/index',
   PERMISSIONS: '/pages/permissions/index',
+  ABOUT: '/pages/about/index',
+  CONTACT: '/pages/contact/index',
+  PRIVACY: '/pages/privacy/index',
+  AGREEMENT: '/pages/agreement/index',
 }
 
 export function isTabRoute(route: string): boolean {

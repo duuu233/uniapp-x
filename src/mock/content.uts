@@ -1,0 +1,138 @@
+import { getLocale } from '@/src/i18n/index.uts'
+import { StaticContentPageData } from '@/src/types/models.uts'
+
+export function getAboutPageDataMock() : StaticContentPageData {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    return {
+      title: 'About ClearMirror',
+      summary: 'A lightweight cross-platform control app for capture, album sync, device management and screen casting.',
+      sections: [
+        { title: 'Product Positioning', content: 'ClearMirror is built for on-site operations that need device onboarding, image capture and fast screen delivery in one workflow.' },
+        { title: 'Current Delivery', content: 'This demo focuses on a stable information architecture, multilingual UI and mock business flows that can be replaced by real services later.' },
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      title: '澄鏡について',
+      summary: '収集、アルバム同期、端末管理、画面配信を横断する軽量なクロスプラットフォーム管理アプリです。',
+      sections: [
+        { title: '製品の位置付け', content: '澄鏡は、端末登録、画像収集、画面配信を一つの業務フローで扱いたい現場向けに設計されています。' },
+        { title: '今回の実装範囲', content: '今回のデモでは、安定した情報設計、多言語 UI、将来実サービスへ差し替えやすい mock フローを重点的に提供しています。' },
+      ],
+    }
+  }
+
+  return {
+    title: '关于我们',
+    summary: '面向采集、相册同步、设备管理和投屏流程的轻量跨端控制应用。',
+    sections: [
+      { title: '产品定位', content: '澄镜智控面向需要设备接入、图片采集和现场投屏的一线业务场景，强调统一入口与低学习成本。' },
+      { title: '当前交付', content: '本次 demo 重点完成稳定的信息架构、多语言支持和可替换真实接口的 mock 业务流。' },
+    ],
+  }
+}
+
+export function getContactPageDataMock() : StaticContentPageData {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    return {
+      title: 'Contact',
+      summary: 'Reach business support, implementation contacts and privacy support from one place.',
+      sections: [
+        { title: 'Business Support', content: 'ops@clearmirror.example\n400-820-2026\nService hours: 09:00-18:00' },
+        { title: 'Implementation Contact', content: 'For onboarding, migration or device rollout, contact your project owner or enterprise administrator first.' },
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      title: 'お問い合わせ',
+      summary: '業務支援、導入窓口、プライバシー相談先をまとめて確認できます。',
+      sections: [
+        { title: '運用サポート', content: 'ops@clearmirror.example\n400-820-2026\n受付時間 09:00-18:00' },
+        { title: '導入窓口', content: '導入、移行、端末展開に関する相談は、まずプロジェクト担当者または企業管理者へ連絡してください。' },
+      ],
+    }
+  }
+
+  return {
+    title: '联系方式',
+    summary: '集中查看业务支持、实施联系人和隐私事务联系渠道。',
+    sections: [
+      { title: '业务支持', content: 'ops@clearmirror.example\n400-820-2026\n服务时间：09:00-18:00' },
+      { title: '实施联系人', content: '如涉及接入、迁移或设备部署，请优先联系项目负责人或企业管理员。' },
+    ],
+  }
+}
+
+export function getPrivacyPageDataMock() : StaticContentPageData {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    return {
+      title: 'Privacy Policy',
+      summary: 'This mock page explains what user data is used during capture, albums and device management.',
+      sections: [
+        { title: 'Collected Data', content: 'The app may use account details, device identifiers, camera media and basic operation logs to complete business workflows.' },
+        { title: 'Storage And Deletion', content: 'In the current mock mode, data stays local to the app runtime. Real deployments should define retention, encryption and deletion rules in backend services.' },
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      title: 'プライバシーポリシー',
+      summary: '収集、アルバム、端末管理で利用するデータの範囲を説明する mock ページです。',
+      sections: [
+        { title: '取得する情報', content: '本アプリは業務フロー実行のため、アカウント情報、端末識別子、撮影メディア、基本操作ログを利用する場合があります。' },
+        { title: '保存と削除', content: '現在の mock モードではデータは実行中のアプリ内でのみ保持されます。実導入時はバックエンド側で保持期間、暗号化、削除ルールを定義してください。' },
+      ],
+    }
+  }
+
+  return {
+    title: '隐私政策',
+    summary: '说明拍照、相册、设备管理流程中涉及的用户数据范围与处理方式。',
+    sections: [
+      { title: '收集范围', content: '应用在完成业务流程时，可能使用账号信息、设备标识、相机媒体内容和基础操作日志。' },
+      { title: '存储与删除', content: '当前 mock 模式下数据仅保留在应用运行态；真实部署时应由后台服务明确留存周期、加密和删除规则。' },
+    ],
+  }
+}
+
+export function getAgreementPageDataMock() : StaticContentPageData {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    return {
+      title: 'User Agreement',
+      summary: 'This mock agreement outlines account, device and content responsibilities for demo use.',
+      sections: [
+        { title: 'Account Responsibility', content: 'Users should keep account credentials and device permissions secure, and must not share operation access without authorization.' },
+        { title: 'Content Responsibility', content: 'Captured media and cast content should comply with enterprise governance and applicable regulations.' },
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      title: 'ユーザー規約',
+      summary: 'この mock 規約では、デモ利用時のアカウント、端末、コンテンツに関する責任範囲を示します。',
+      sections: [
+        { title: 'アカウント責任', content: '利用者はアカウント資格情報と端末権限を適切に保護し、無断で操作権限を共有してはいけません。' },
+        { title: 'コンテンツ責任', content: '撮影素材と投屏コンテンツは、企業の管理方針と適用法令に適合している必要があります。' },
+      ],
+    }
+  }
+
+  return {
+    title: '用户协议',
+    summary: '用于说明 demo 阶段下账号、设备与内容操作的责任边界。',
+    sections: [
+      { title: '账号责任', content: '用户应妥善保管账号凭据和设备权限，不得未经授权共享操作入口。' },
+      { title: '内容责任', content: '拍摄素材与投屏内容应符合企业治理要求和适用法律法规。' },
+    ],
+  }
+}

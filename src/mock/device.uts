@@ -1,100 +1,99 @@
+import { getLocale } from '@/src/i18n/index.uts'
+import { getMockState } from '@/src/mock/state.uts'
 import { BindPageData, DevicePageData } from '@/src/types/models.uts'
 
-export function getBindPageDataMock(): BindPageData {
+export function getBindPageDataMock() : BindPageData {
+  const locale = getLocale()
+
+  if (locale == 'en-US') {
+    return {
+      overview: 'Support QR binding, Bluetooth discovery and manual SN entry. Newly bound devices can be switched from My Devices immediately.',
+      steps: [
+        { title: 'Choose Method', description: 'Pick QR scan, Bluetooth discovery or manual SN entry.', statusText: 'Step 1', statusTone: 'primary' },
+        { title: 'Confirm Device', description: 'Verify device name, owner, serial number and location.', statusText: 'Step 2', statusTone: 'neutral' },
+        { title: 'Write Access', description: 'Save owner and user permissions, then move into device management.', statusText: 'Step 3', statusTone: 'success' },
+      ],
+      methods: [
+        { title: 'QR Binding', description: 'Fastest path for first-time onboarding.', helper: 'Best for devices with visible labels and predictable network state.', actionLabel: 'Bind By QR', tone: 'primary' },
+        { title: 'Bluetooth Discovery', description: 'Fits nearby rollout and quick inspection.', helper: 'Use this when devices are physically close and need quick switching.', actionLabel: 'Discover Nearby', tone: 'success' },
+        { title: 'Manual Entry', description: 'Fallback for damaged labels or offline registration.', helper: 'Enter SN code and a readable device name before saving.', actionLabel: 'Manual Entry', tone: 'warning' },
+      ],
+      supportText: 'After binding, set owner, permission role and carousel mode immediately so later casting and cleanup actions stay consistent.',
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      overview: 'QR 登録、Bluetooth 検出、SN 手動入力に対応し、登録後はすぐマイデバイスで切替できます。',
+      steps: [
+        { title: '方法を選択', description: 'QR、Bluetooth、SN 手動入力から選択します。', statusText: '手順 1', statusTone: 'primary' },
+        { title: '端末を確認', description: '端末名、所有者、シリアル番号、設置場所を確認します。', statusText: '手順 2', statusTone: 'neutral' },
+        { title: '権限を書き込む', description: '所有者 / 使用者権限を保存し、端末管理へ引き渡します。', statusText: '手順 3', statusTone: 'success' },
+      ],
+      methods: [
+        { title: 'QR 登録', description: '初回導入で最も速い経路です。', helper: 'ラベルが読める新規端末に適しています。', actionLabel: 'QR で登録', tone: 'primary' },
+        { title: 'Bluetooth 検出', description: '近距離の展開と巡回に適しています。', helper: '近くの端末をすばやく検出して切り替えます。', actionLabel: '周辺検索', tone: 'success' },
+        { title: '手動入力', description: 'ラベル破損やオフライン登録の予備手段です。', helper: 'SN と端末名を入力して保存します。', actionLabel: '手動入力', tone: 'warning' },
+      ],
+      supportText: '登録後は所有者、権限ロール、輪播モードをすぐ設定し、後続の投屏と清掃操作を安定させます。',
+    }
+  }
+
   return {
-    overview: '绑定流程保持轻量，支持扫码、蓝牙发现和手动录入三种方式，适合巡检与标准办公场景。',
+    overview: '支持扫码绑定、蓝牙发现和 SN 手动录入，绑定完成后可立即在我的设备中切换连接。',
     steps: [
-      {
-        title: '选择绑定方式',
-        description: '根据现场条件选择扫码、蓝牙发现或 SN 号录入。',
-        statusText: '步骤一',
-        statusTone: 'primary',
-      },
-      {
-        title: '确认设备身份',
-        description: '读取设备名称、位置、序列号与负责人信息。',
-        statusText: '步骤二',
-        statusTone: 'neutral',
-      },
-      {
-        title: '写入组织关系',
-        description: '绑定成功后自动进入“我的设备”和投屏管理。',
-        statusText: '步骤三',
-        statusTone: 'success',
-      },
+      { title: '选择方式', description: '在扫码、蓝牙发现、SN 手动录入三种方式中选择。', statusText: '步骤一', statusTone: 'primary' },
+      { title: '确认设备', description: '核对设备名称、所有者、序列号和所在位置。', statusText: '步骤二', statusTone: 'neutral' },
+      { title: '写入权限', description: '保存所有者 / 使用者权限后交由设备管理页维护。', statusText: '步骤三', statusTone: 'success' },
     ],
     methods: [
-      {
-        title: '扫码绑定',
-        description: '适合新机首次接入，效率最高。',
-        helper: '读取设备背贴二维码并自动识别序列号。',
-        actionLabel: '立即扫码',
-        tone: 'primary',
-      },
-      {
-        title: '蓝牙发现',
-        description: '适合近距离批量部署和巡检现场。',
-        helper: '自动搜索附近设备并展示信号强度。',
-        actionLabel: '开始搜索',
-        tone: 'success',
-      },
-      {
-        title: '手动录入',
-        description: '适合设备条码损坏或离线登记场景。',
-        helper: '根据设备 SN 号和名称进行绑定。',
-        actionLabel: '手动填写',
-        tone: 'warning',
-      },
+      { title: '扫码绑定', description: '适合新机首次接入，效率最高。', helper: '适用于标签清晰、网络状态明确的新设备。', actionLabel: '扫码接入', tone: 'primary' },
+      { title: '蓝牙发现', description: '适合近距离部署和巡检切换。', helper: '适用于附近设备的快速发现与接入。', actionLabel: '搜索附近设备', tone: 'success' },
+      { title: '手动录入', description: '适合标签损坏或离线登记场景。', helper: '请输入 SN 码和可识别的设备名称。', actionLabel: '手动录入', tone: 'warning' },
     ],
-    supportText: '绑定成功后建议立即补充位置、负责人和投屏分组，方便后续检索与统计。',
+    supportText: '绑定后建议立即设置所有者、权限角色和轮播模式，保证后续投屏与清理流程稳定。',
   }
 }
 
-export function getDevicePageDataMock(): DevicePageData {
+export function getDevicePageDataMock() : DevicePageData {
+  const state = getMockState()
+  const locale = getLocale()
+  const connectedDevice = state.devices.find((item) => item.connected)
+
+  if (locale == 'en-US') {
+    return {
+      overview: 'Manage connected devices, rename them, switch permissions, update SN codes and clear frame memory from one page.',
+      tags: ['All', 'Online', 'Pending Access', 'Display', 'Mobile'],
+      connectedDeviceId: connectedDevice != null ? connectedDevice.id : '',
+      notes: [
+        'Owners can clear memory and reuse SN codes.',
+        'Carousel mode changes affect the next displayed photo after the configured interval.',
+      ],
+      devices: state.devices,
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      overview: '接続端末の管理、名称編集、権限切替、SN 更新、一键清空を一画面で行えます。',
+      tags: ['全部', '在线', '待授权', '展示', '移动'],
+      connectedDeviceId: connectedDevice != null ? connectedDevice.id : '',
+      notes: [
+        '所有者は清空と SN 再利用を管理できます。',
+        '輪播モード変更は次回表示タイミングから反映されます。',
+      ],
+      devices: state.devices,
+    }
+  }
+
   return {
-    overview: '我的设备页强调统一纳管和快速检索，默认展示状态、位置、连接方式与最近更新时间。',
-    tags: ['全部', '在线', '待授权', '演示大屏', '移动终端'],
-    devices: [
-      {
-        id: 'device-a01',
-        name: '大厅演示屏 A01',
-        location: '总部 1F 接待区',
-        status: '在线',
-        statusTone: 'success',
-        connection: 'Wi-Fi 6 / 4K 投屏',
-        battery: '外接电源',
-        updatedAt: '2 分钟前',
-      },
-      {
-        id: 'device-b03',
-        name: '会议平板 B03',
-        location: '总部 6F 多功能厅',
-        status: '在线',
-        statusTone: 'primary',
-        connection: '有线局域网 / 1080P',
-        battery: '外接电源',
-        updatedAt: '18 分钟前',
-      },
-      {
-        id: 'device-c08',
-        name: '移动采集终端 C08',
-        location: '华东巡检组',
-        status: '待授权',
-        statusTone: 'warning',
-        connection: '5G / 蓝牙',
-        battery: '73%',
-        updatedAt: '6 分钟前',
-      },
-      {
-        id: 'device-d11',
-        name: '门店样机 D11',
-        location: '浦东体验店',
-        status: '低频使用',
-        statusTone: 'neutral',
-        connection: 'Wi-Fi / 1080P',
-        battery: '外接电源',
-        updatedAt: '1 小时前',
-      },
+    overview: '统一管理当前设备连接、名称编辑、权限切换、SN 码配置和一键清空能力。',
+    tags: ['全部', '在线', '待授权', '展示', '移动'],
+    connectedDeviceId: connectedDevice != null ? connectedDevice.id : '',
+    notes: [
+      '所有者可执行一键清空和 SN 码复用。',
+      '轮播模式切换会在下一张图片播放节点生效。',
     ],
+    devices: state.devices,
   }
 }

@@ -2,9 +2,43 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">SETTINGS</text>
-        <text class="page-title">设置</text>
-        <text class="page-subtitle">版本 {{ pageState.settings.versionName }} · 最近同步 {{ pageState.settings.lastSync }}</text>
+        <text class="page-kicker">{{ $t('pages.settings.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.settings.title') }}</text>
+        <text class="page-subtitle">{{ $t('pages.settings.heroSubtitle', { version: pageState.settings.versionName, lastSync: pageState.settings.lastSync }) }}</text>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">{{ $t('pages.settings.language.title') }}</text>
+        <text class="surface-subtitle">{{ $t('pages.settings.language.subtitle') }}</text>
+        <view class="language-list">
+          <view :class="$locale.value == 'zh-CN' ? 'language-row language-row--active' : 'language-row'" @tap="changeLocale('zh-CN')">
+            <view class="list-cell-copy">
+              <text class="list-cell-title">{{ $t('common.languages.zhCn') }}</text>
+              <text class="list-cell-desc">zh-CN</text>
+            </view>
+            <view :class="$locale.value == 'zh-CN' ? 'tone-pill tone-pill--primary' : 'tone-pill tone-pill--neutral'">
+              <text :class="$locale.value == 'zh-CN' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">{{ $locale.value == 'zh-CN' ? $t('pages.settings.language.current') : 'zh-CN' }}</text>
+            </view>
+          </view>
+          <view :class="$locale.value == 'en-US' ? 'language-row language-row--active' : 'language-row'" @tap="changeLocale('en-US')">
+            <view class="list-cell-copy">
+              <text class="list-cell-title">{{ $t('common.languages.enUs') }}</text>
+              <text class="list-cell-desc">en-US</text>
+            </view>
+            <view :class="$locale.value == 'en-US' ? 'tone-pill tone-pill--primary' : 'tone-pill tone-pill--neutral'">
+              <text :class="$locale.value == 'en-US' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">{{ $locale.value == 'en-US' ? $t('pages.settings.language.current') : 'en-US' }}</text>
+            </view>
+          </view>
+          <view :class="$locale.value == 'ja-JP' ? 'language-row language-row--active' : 'language-row'" @tap="changeLocale('ja-JP')">
+            <view class="list-cell-copy">
+              <text class="list-cell-title">{{ $t('common.languages.jaJp') }}</text>
+              <text class="list-cell-desc">ja-JP</text>
+            </view>
+            <view :class="$locale.value == 'ja-JP' ? 'tone-pill tone-pill--primary' : 'tone-pill tone-pill--neutral'">
+              <text :class="$locale.value == 'ja-JP' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">{{ $locale.value == 'ja-JP' ? $t('pages.settings.language.current') : 'ja-JP' }}</text>
+            </view>
+          </view>
+        </view>
       </view>
 
       <view v-for="(group, groupIndex) in pageState.settings.groups" :key="group.title" class="surface-card group-card">
@@ -15,22 +49,58 @@
             <text class="list-cell-desc">{{ item.description }}</text>
           </view>
           <view :class="item.enabled ? 'tone-pill tone-pill--success' : 'tone-pill tone-pill--neutral'">
-            <text :class="item.enabled ? 'tone-pill-text tone-pill-text--success' : 'tone-pill-text tone-pill-text--neutral'">{{ item.enabled ? '已开启' : '已关闭' }}</text>
+            <text :class="item.enabled ? 'tone-pill-text tone-pill-text--success' : 'tone-pill-text tone-pill-text--neutral'">{{ item.enabled ? $t('common.status.enabled') : $t('common.status.disabled') }}</text>
           </view>
         </view>
       </view>
 
       <view class="surface-card">
-        <text class="surface-title">接入建议</text>
-        <text class="surface-subtitle">设置项建议由后台配置中心驱动，并用本地缓存做兜底，避免不同平台手动维护不一致。</text>
+        <text class="surface-title">服务与政策</text>
+        <text class="surface-subtitle">集中查看产品说明、联系方式、隐私政策和用户协议。</text>
+        <view v-for="(item, index) in pageState.settings.supportLinks" :key="item.id" :class="index == pageState.settings.supportLinks.length - 1 ? 'list-cell list-cell--last' : 'list-cell'" @tap="goTo(item.route)">
+          <view class="list-cell-copy">
+            <text class="list-cell-title">{{ item.title }}</text>
+            <text class="list-cell-desc">{{ item.description }}</text>
+          </view>
+          <view class="cell-meta">
+            <view :class="'tone-pill tone-pill--' + item.tone">
+              <text :class="'tone-pill-text tone-pill-text--' + item.tone">查看</text>
+            </view>
+            <text class="cell-arrow">›</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">账号与会话</text>
+        <text class="surface-subtitle">支持退出登录和用户注销，满足需求表中的完整会话操作。</text>
+        <view v-for="(item, index) in pageState.settings.sessionActions" :key="item.id" :class="index == pageState.settings.sessionActions.length - 1 ? 'list-cell list-cell--last' : 'list-cell'" @tap="goTo(item.route)">
+          <view class="list-cell-copy">
+            <text class="list-cell-title">{{ item.title }}</text>
+            <text class="list-cell-desc">{{ item.description }}</text>
+          </view>
+          <view class="cell-meta">
+            <view :class="'tone-pill tone-pill--' + item.tone">
+              <text :class="'tone-pill-text tone-pill-text--' + item.tone">进入</text>
+            </view>
+            <text class="cell-arrow">›</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">{{ $t('pages.settings.suggestionTitle') }}</text>
+        <text class="surface-subtitle">{{ $t('pages.settings.suggestionSubtitle') }}</text>
       </view>
     </view>
   </scroll-view>
 </template>
 
 <script setup lang="uts">
-import { fetchSettingsPageData } from '@/src/services/system.uts'
+import { applyPageTitle, getLanguageLabel, isLocale, setLocale, t } from '@/src/i18n/index.uts'
+import { fetchSettingsPageData, updateSettingItem } from '@/src/services/system.uts'
 import { SettingsPageData, createEmptySettingsPageData } from '@/src/types/models.uts'
+import { openRoute } from '@/src/utils/navigation.uts'
 
 const pageState = reactive({
   loading: false,
@@ -51,25 +121,68 @@ async function loadSettings() {
     pageState.settings = settings
   } catch (error) {
     uni.showToast({
-      title: '设置加载失败',
+      title: t('pages.settings.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-function toggleSetting(groupIndex: number, itemIndex: number): void {
+async function toggleSetting(groupIndex: number, itemIndex: number): Promise<void> {
   const item = pageState.settings.groups[groupIndex].items[itemIndex]
-  item.enabled = !item.enabled
+  pageState.settings = await updateSettingItem(item.id, !item.enabled)
 }
 
-onLoad(() => {
+function changeLocale(locale: string): void {
+  if (isLocale(locale)) {
+    return
+  }
+
+  const languageLabel = getLanguageLabel(locale)
+  setLocale(locale)
+  applyPageTitle('nav.settings')
   loadSettings()
+  uni.showToast({
+    title: t('pages.settings.language.changed', { language: languageLabel }),
+    icon: 'none',
+  })
+}
+
+function refreshPage(): void {
+  applyPageTitle('nav.settings')
+  loadSettings()
+}
+
+function goTo(route: string): void {
+  openRoute(route)
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
 <style lang="scss">
 .group-card {
   padding-top: 22rpx;
+}
+
+.language-list {
+  margin-top: 12rpx;
+}
+
+.language-row {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 18rpx;
+  padding-bottom: 18rpx;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(213, 204, 190, 0.7);
+}
+
+.language-row--active {
+  border-bottom-color: rgba(31, 75, 78, 0.2);
 }
 </style>

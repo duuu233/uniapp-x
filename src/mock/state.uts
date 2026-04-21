@@ -1,0 +1,364 @@
+import { getLocale } from '@/src/i18n/index.uts'
+import { AlbumItem, CastRecord, GuideSection, ManagedDevice, ProfileFormData, ScreenRoom, Tone } from '@/src/types/models.uts'
+
+type MockAuthState = {
+  isLoggedIn: boolean
+  email: string
+  password: string
+  loginCode: string
+  registerCode: string
+}
+
+type MockSettingsFlags = {
+  notification: boolean
+  autoSync: boolean
+  screenProtect: boolean
+  biometric: boolean
+}
+
+type MockAppState = {
+  auth: MockAuthState
+  profile: ProfileFormData
+  albums: Array<AlbumItem>
+  devices: Array<ManagedDevice>
+  rooms: Array<ScreenRoom>
+  castRecords: Array<CastRecord>
+  settings: MockSettingsFlags
+  guideSections: Array<GuideSection>
+}
+
+let mockState : MockAppState | null = null
+let idSeed = 100
+
+function nextId(prefix : string) : string {
+  idSeed += 1
+  return prefix + '-' + idSeed.toString()
+}
+
+export function createTimeLabel(minutesAgo : number = 0) : string {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    if (minutesAgo <= 0) {
+      return 'Just now'
+    }
+    if (minutesAgo < 60) {
+      return minutesAgo.toString() + ' minutes ago'
+    }
+    return Math.floor(minutesAgo / 60).toString() + ' hours ago'
+  }
+
+  if (locale == 'ja-JP') {
+    if (minutesAgo <= 0) {
+      return 'たった今'
+    }
+    if (minutesAgo < 60) {
+      return minutesAgo.toString() + ' 分前'
+    }
+    return Math.floor(minutesAgo / 60).toString() + ' 時間前'
+  }
+
+  if (minutesAgo <= 0) {
+    return '刚刚'
+  }
+  if (minutesAgo < 60) {
+    return minutesAgo.toString() + ' 分钟前'
+  }
+  return Math.floor(minutesAgo / 60).toString() + ' 小时前'
+}
+
+function createInitialProfile() : ProfileFormData {
+  return {
+    displayName: '王安然',
+    avatarText: 'WA',
+    wechatNickname: '澄镜小安',
+    wechatBound: true,
+    email: 'anan.wang@clearmirror.example',
+    phone: '138 0000 8201',
+    employeeId: 'CM-1024',
+    role: '平台主管',
+    company: '上海澄镜数字科技',
+  }
+}
+
+function createInitialAlbums() : Array<AlbumItem> {
+  return [
+    {
+      id: 'album-001',
+      title: '大厅晨检',
+      capturedAt: createTimeLabel(15),
+      deviceName: '大厅演示屏 A01',
+      status: '已同步',
+      statusTone: 'success',
+      summary: '已同步至企业相册并完成基础标签标注。',
+      tags: ['大厅', '巡检', '自动标签'],
+      uploadedByCurrentUser: true,
+    },
+    {
+      id: 'album-002',
+      title: '6F 会议准备',
+      capturedAt: createTimeLabel(42),
+      deviceName: '会议平板 B03',
+      status: '待审核',
+      statusTone: 'warning',
+      summary: '已上传缩略图，等待业务侧确认后入库。',
+      tags: ['会议室', '待审核'],
+      uploadedByCurrentUser: true,
+    },
+    {
+      id: 'album-003',
+      title: '门店样机确认',
+      capturedAt: createTimeLabel(90),
+      deviceName: '门店样机 D11',
+      status: '已归档',
+      statusTone: 'primary',
+      summary: '业务归档已完成，可按设备或时间检索。',
+      tags: ['门店', '样机', '归档'],
+      uploadedByCurrentUser: false,
+    },
+  ]
+}
+
+function createInitialDevices() : Array<ManagedDevice> {
+  return [
+    {
+      id: 'device-a01',
+      name: '大厅演示屏 A01',
+      location: '总部 1F 接待区',
+      status: '在线',
+      statusTone: 'success',
+      connection: 'Wi-Fi 6 / 4K 投屏',
+      battery: '外接电源',
+      updatedAt: createTimeLabel(8),
+      ownerName: '王安然',
+      permissionLabel: '所有者',
+      serialNumber: 'CM-A01-2026',
+      connected: true,
+      carouselEnabled: true,
+      memoryLabel: '剩余 42%',
+      typeLabel: '演示大屏',
+      canReuseSn: true,
+    },
+    {
+      id: 'device-b03',
+      name: '会议平板 B03',
+      location: '总部 6F 多功能厅',
+      status: '在线',
+      statusTone: 'primary',
+      connection: '有线局域网 / 1080P',
+      battery: '外接电源',
+      updatedAt: createTimeLabel(21),
+      ownerName: '王安然',
+      permissionLabel: '使用者',
+      serialNumber: 'CM-B03-2026',
+      connected: false,
+      carouselEnabled: false,
+      memoryLabel: '剩余 18%',
+      typeLabel: '会议平板',
+      canReuseSn: true,
+    },
+    {
+      id: 'device-c08',
+      name: '移动采集终端 C08',
+      location: '华东巡检组',
+      status: '待授权',
+      statusTone: 'warning',
+      connection: '5G / 蓝牙',
+      battery: '73%',
+      updatedAt: createTimeLabel(36),
+      ownerName: '华东巡检组',
+      permissionLabel: '使用者',
+      serialNumber: 'CM-C08-2026',
+      connected: false,
+      carouselEnabled: false,
+      memoryLabel: '相框存储偏满',
+      typeLabel: '移动终端',
+      canReuseSn: true,
+    },
+    {
+      id: 'device-d11',
+      name: '门店样机 D11',
+      location: '浦东体验店',
+      status: '低频使用',
+      statusTone: 'neutral',
+      connection: 'Wi-Fi / 1080P',
+      battery: '外接电源',
+      updatedAt: createTimeLabel(75),
+      ownerName: '门店负责人',
+      permissionLabel: '所有者',
+      serialNumber: 'CM-D11-2026',
+      connected: false,
+      carouselEnabled: true,
+      memoryLabel: '剩余 67%',
+      typeLabel: '门店样机',
+      canReuseSn: true,
+    },
+  ]
+}
+
+function createInitialRooms() : Array<ScreenRoom> {
+  return [
+    {
+      name: '总部品牌展厅',
+      mode: '欢迎页轮播',
+      deviceCount: '2 台',
+      status: '运行中',
+      statusTone: 'success',
+      description: '用于访客接待与品牌展示，支持静默切换素材。',
+    },
+    {
+      name: '6F 多功能厅',
+      mode: '会议镜像',
+      deviceCount: '3 台',
+      status: '待排期',
+      statusTone: 'warning',
+      description: '适配宣讲、培训和内部例会的大屏联动场景。',
+    },
+    {
+      name: '浦东体验店',
+      mode: '商品演示',
+      deviceCount: '1 台',
+      status: '在线',
+      statusTone: 'primary',
+      description: '可远程切换演示内容并查看设备在线状态。',
+    },
+  ]
+}
+
+function createInitialCastRecords() : Array<CastRecord> {
+  return [
+    {
+      id: 'cast-001',
+      title: '大厅晨检',
+      deviceName: '大厅演示屏 A01',
+      status: '投屏成功',
+      statusTone: 'success',
+      createdAt: createTimeLabel(18),
+      summary: '已完成预览图校验并投屏至默认设备。',
+    },
+    {
+      id: 'cast-002',
+      title: '6F 会议准备',
+      deviceName: '会议平板 B03',
+      status: '失败待重试',
+      statusTone: 'warning',
+      createdAt: createTimeLabel(54),
+      summary: '检测到设备连接已切换，建议重新确认设备后再投屏。',
+    },
+  ]
+}
+
+function createInitialGuideSections() : Array<GuideSection> {
+  return [
+    {
+      category: '演示大屏',
+      title: '展厅大屏投屏',
+      description: '适合品牌展厅、门店和访客接待场景的标准投屏流程。',
+      points: ['优先确认设备连接状态与相框剩余存储。', '投屏前建议先预览图片尺寸，减少裁切风险。'],
+    },
+    {
+      category: '会议平板',
+      title: '会议平板联动',
+      description: '适合培训、例会和临时演示的镜像与素材切换流程。',
+      points: ['设备切换后先校验当前权限角色。', '失败记录建议在投屏管理中统一删除或重试。'],
+    },
+    {
+      category: '移动终端',
+      title: '移动采集与上传',
+      description: '适合巡检终端的拍照、相册选择和上传归档操作。',
+      points: ['巡检照片只允许本人删除。', '若相框存储过满，先清理再发起投屏。'],
+    },
+    {
+      category: '全部',
+      title: '账号与设置',
+      description: '覆盖注册、登录、退出登录、注销和多语言设置。',
+      points: ['app 支持中英日切换。', '注销前请先导出或清理需要保留的资料。'],
+    },
+  ]
+}
+
+function createInitialState() : MockAppState {
+  const profile = createInitialProfile()
+  return {
+    auth: {
+      isLoggedIn: true,
+      email: profile.email,
+      password: 'clear123',
+      loginCode: '246810',
+      registerCode: '135790',
+    },
+    profile,
+    albums: createInitialAlbums(),
+    devices: createInitialDevices(),
+    rooms: createInitialRooms(),
+    castRecords: createInitialCastRecords(),
+    settings: {
+      notification: true,
+      autoSync: true,
+      screenProtect: true,
+      biometric: false,
+    },
+    guideSections: createInitialGuideSections(),
+  }
+}
+
+export function getMockState() : MockAppState {
+  if (mockState == null) {
+    mockState = createInitialState()
+  }
+  return mockState!
+}
+
+export function resetMockState() : void {
+  mockState = createInitialState()
+}
+
+export function issueVerificationCode(kind : string) : string {
+  const state = getMockState()
+  const code = kind == 'register' ? '135790' : '246810'
+  if (kind == 'register') {
+    state.auth.registerCode = code
+  } else {
+    state.auth.loginCode = code
+  }
+  return code
+}
+
+export function markLoggedIn(email : string, password : string) : void {
+  const state = getMockState()
+  state.auth.isLoggedIn = true
+  state.auth.email = email
+  state.auth.password = password
+  state.profile.email = email
+}
+
+export function markLoggedOut() : void {
+  const state = getMockState()
+  state.auth.isLoggedIn = false
+}
+
+export function createAlbumRecord(title : string, sourceTag : string, deviceName : string) : AlbumItem {
+  const record : AlbumItem = {
+    id: nextId('album'),
+    title,
+    capturedAt: createTimeLabel(),
+    deviceName,
+    status: '待投屏',
+    statusTone: 'warning',
+    summary: '已加入我的相册，等待选择设备后发起投屏。',
+    tags: [sourceTag, '新记录'],
+    uploadedByCurrentUser: true,
+  }
+  return record
+}
+
+export function createCastRecord(title : string, deviceName : string, tone : Tone, summary : string, status : string) : CastRecord {
+  return {
+    id: nextId('cast'),
+    title,
+    deviceName,
+    status,
+    statusTone: tone,
+    createdAt: createTimeLabel(),
+    summary,
+  }
+}

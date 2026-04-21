@@ -1,6 +1,7 @@
 import { getCompanyPageDataMock, getProfilePageDataMock } from '@/src/mock/account.uts'
+import { getMockState } from '@/src/mock/state.uts'
 import { request } from '@/src/network/http.uts'
-import { CompanyPageData, ProfilePageData } from '@/src/types/models.uts'
+import { CompanyPageData, ProfileFormData, ProfilePageData } from '@/src/types/models.uts'
 
 export function fetchProfilePageData(): Promise<ProfilePageData> {
   return request<ProfilePageData>({
@@ -15,5 +16,54 @@ export function fetchCompanyPageData(): Promise<CompanyPageData> {
     path: '/company',
     method: 'GET',
     mockData: getCompanyPageDataMock(),
+  })
+}
+
+export function updateProfileForm(form: ProfileFormData): Promise<ProfilePageData> {
+  return new Promise<ProfilePageData>((resolve, reject) => {
+    if (form.displayName.trim().length < 2) {
+      reject('Display name must be at least 2 characters')
+      return
+    }
+    if (form.email.trim().indexOf('@') <= 0) {
+      reject('Please enter a valid email address')
+      return
+    }
+
+    const state = getMockState()
+    setTimeout(() => {
+      state.profile.displayName = form.displayName.trim()
+      state.profile.avatarText = form.avatarText.trim().length > 0 ? form.avatarText.trim().toUpperCase() : state.profile.displayName.substring(0, 2).toUpperCase()
+      state.profile.wechatNickname = form.wechatNickname.trim()
+      state.profile.wechatBound = form.wechatBound
+      state.profile.email = form.email.trim()
+      state.profile.phone = form.phone.trim()
+      state.profile.employeeId = form.employeeId.trim()
+      state.profile.role = form.role.trim()
+      state.profile.company = form.company.trim()
+
+      for (const device of state.devices) {
+        if (device.ownerName == '王安然' || device.ownerName == 'Anran Wang' || device.ownerName == '王 安然') {
+          device.ownerName = state.profile.displayName
+        }
+      }
+
+      resolve(getProfilePageDataMock())
+    }, 260)
+  })
+}
+
+export function bindProfileEmail(email: string): Promise<ProfilePageData> {
+  return new Promise<ProfilePageData>((resolve, reject) => {
+    if (email.trim().indexOf('@') <= 0) {
+      reject('Please enter a valid email address')
+      return
+    }
+
+    const state = getMockState()
+    setTimeout(() => {
+      state.profile.email = email.trim()
+      resolve(getProfilePageDataMock())
+    }, 220)
   })
 }

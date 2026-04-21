@@ -1,45 +1,47 @@
+import { getLocale } from '@/src/i18n/index.uts'
+import { getMockState } from '@/src/mock/state.uts'
 import { AlbumPageData } from '@/src/types/models.uts'
 
-export function getAlbumPageDataMock(): AlbumPageData {
+export function getAlbumPageDataMock() : AlbumPageData {
+  const state = getMockState()
+  const locale = getLocale()
+  const syncedCount = state.albums.filter((item) => item.statusTone == 'success' || item.statusTone == 'primary').length
+  const pendingCount = state.albums.length - syncedCount
+
+  if (locale == 'en-US') {
+    return {
+      overview: 'Manage uploaded images, delete your own records in bulk, and cast selected photos to the currently connected frame.',
+      summary: {
+        totalCount: state.albums.length,
+        pendingCount,
+        syncedCount,
+      },
+      storageHint: 'Only records uploaded by the current user can be deleted. If frame storage is full, clear the frame or contact the owner before casting.',
+      items: state.albums,
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      overview: 'アップロード済み画像を管理し、自分の記録のみ一括削除でき、現在接続中の相框へ投屏できます。',
+      summary: {
+        totalCount: state.albums.length,
+        pendingCount,
+        syncedCount,
+      },
+      storageHint: '削除できるのは自分がアップロードした記録のみです。相框ストレージが満杯の場合は、先に清掃するか所有者へ連絡してください。',
+      items: state.albums,
+    }
+  }
+
   return {
-    overview: '相册页面聚合移动端采集记录，默认展示最近上传内容，并预留筛选、批量归档和审核入口。',
+    overview: '管理已上传图片，支持多选删除自己上传的记录，并可将选中照片投屏到当前连接设备。',
     summary: {
-      totalCount: 128,
-      pendingCount: 6,
-      syncedCount: 122,
+      totalCount: state.albums.length,
+      pendingCount,
+      syncedCount,
     },
-    storageHint: '建议默认保留最近 30 天记录，并为大图上传、压缩策略和离线缓存预留单独配置项。',
-    items: [
-      {
-        id: 'album-001',
-        title: '大厅晨检',
-        capturedAt: '今天 08:45',
-        deviceName: '移动采集终端 C08',
-        status: '已同步',
-        statusTone: 'success',
-        summary: '已同步至企业相册并完成基础标签标注。',
-        tags: ['大厅', '巡检', '自动标签'],
-      },
-      {
-        id: 'album-002',
-        title: '6F 会议准备',
-        capturedAt: '今天 09:12',
-        deviceName: '会议平板 B03',
-        status: '待审核',
-        statusTone: 'warning',
-        summary: '已上传缩略图，等待业务侧确认后入库。',
-        tags: ['会议室', '待审核'],
-      },
-      {
-        id: 'album-003',
-        title: '门店样机确认',
-        capturedAt: '昨天 18:26',
-        deviceName: '大厅演示屏 A01',
-        status: '已归档',
-        statusTone: 'primary',
-        summary: '业务归档已完成，可按设备或时间检索。',
-        tags: ['门店', '样机', '归档'],
-      },
-    ],
+    storageHint: '仅允许删除当前用户上传的照片；若相框存储已满，请先清理相框照片或联系设备所有者。',
+    items: state.albums,
   }
 }

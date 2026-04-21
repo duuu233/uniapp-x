@@ -7,6 +7,24 @@
       }
     },
     {
+      "path": "pages/register/index",
+      "style": {
+        "navigationBarTitleText": "注册账号"
+      }
+    },
+    {
+      "path": "pages/logout/index",
+      "style": {
+        "navigationBarTitleText": "退出登录"
+      }
+    },
+    {
+      "path": "pages/delete-account/index",
+      "style": {
+        "navigationBarTitleText": "用户注销"
+      }
+    },
+    {
       "path": "pages/home/index",
       "style": {
         "navigationBarTitleText": "首页"
@@ -64,6 +82,30 @@
       "path": "pages/settings/index",
       "style": {
         "navigationBarTitleText": "设置"
+      }
+    },
+    {
+      "path": "pages/about/index",
+      "style": {
+        "navigationBarTitleText": "关于我们"
+      }
+    },
+    {
+      "path": "pages/contact/index",
+      "style": {
+        "navigationBarTitleText": "联系方式"
+      }
+    },
+    {
+      "path": "pages/privacy/index",
+      "style": {
+        "navigationBarTitleText": "隐私政策"
+      }
+    },
+    {
+      "path": "pages/agreement/index",
+      "style": {
+        "navigationBarTitleText": "用户协议"
       }
     },
     {

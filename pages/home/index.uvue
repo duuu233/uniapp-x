@@ -2,18 +2,18 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card hero-card--accent">
-        <text class="page-kicker page-kicker--accent">DEVICE ORCHESTRATION</text>
+        <text class="page-kicker page-kicker--accent">{{ $t('pages.home.kicker') }}</text>
         <text class="page-title page-title--accent">{{ pageState.dashboard.greeting }}</text>
         <text class="page-subtitle page-subtitle--accent">{{ pageState.dashboard.subtitle }}</text>
         <view class="hero-tags">
           <view class="tone-pill tone-pill--neutral hero-tag">
-            <text class="tone-pill-text tone-pill-text--neutral">App Only</text>
+            <text class="tone-pill-text tone-pill-text--neutral">{{ $t('common.labels.appOnly') }}</text>
           </view>
           <view class="tone-pill tone-pill--neutral hero-tag">
-            <text class="tone-pill-text tone-pill-text--neutral">Mock Data</text>
+            <text class="tone-pill-text tone-pill-text--neutral">{{ $t('common.labels.mockData') }}</text>
           </view>
           <view class="tone-pill tone-pill--neutral hero-tag">
-            <text class="tone-pill-text tone-pill-text--neutral">{{ pageState.loading ? '同步中' : '已更新' }}</text>
+            <text class="tone-pill-text tone-pill-text--neutral">{{ pageState.loading ? $t('common.status.syncing') : $t('common.status.updated') }}</text>
           </view>
         </view>
       </view>
@@ -24,7 +24,39 @@
         </view>
       </view>
 
-      <AppSection eyebrow="工作台" title="高频入口" subtitle="围绕采集、权限、设备和投屏的统一入口">
+      <view class="surface-card">
+        <text class="surface-title">首页执行流</text>
+        <text class="surface-subtitle">支持拍照、相册选择、设备切换、预览确认和一键投屏，满足需求表中的首页闭环操作。</text>
+        <view class="flow-actions">
+          <view class="ghost-button flow-button" @tap="captureFromCamera">
+            <text class="ghost-button-text">拍照</text>
+          </view>
+          <view class="ghost-button flow-button" @tap="pickFromAlbum">
+            <text class="ghost-button-text">相册选择</text>
+          </view>
+          <view class="ghost-button flow-button" @tap="goPermissions">
+            <text class="ghost-button-text">权限检查</text>
+          </view>
+          <view class="ghost-button flow-button" @tap="chooseDevice">
+            <text class="ghost-button-text">设备选择</text>
+          </view>
+          <view class="primary-button flow-button flow-button--primary" @tap="confirmCast">
+            <text class="primary-button-text">确认投屏</text>
+          </view>
+        </view>
+        <view class="flow-preview">
+          <text class="info-label">当前图片</text>
+          <text class="info-value">{{ pageState.pendingTitle.length > 0 ? pageState.pendingTitle : '尚未选择图片' }}</text>
+          <text class="info-helper">来源：{{ pageState.pendingSource.length > 0 ? pageState.pendingSource : '未选择' }}</text>
+        </view>
+        <view class="flow-preview">
+          <text class="info-label">目标设备</text>
+          <text class="info-value">{{ pageState.selectedDeviceName.length > 0 ? pageState.selectedDeviceName : '尚未选择设备' }}</text>
+          <text class="info-helper">{{ pageState.flowResult.length > 0 ? pageState.flowResult : '请选择图片和设备后再发起投屏' }}</text>
+        </view>
+      </view>
+
+      <AppSection :eyebrow="$t('pages.home.sections.quick.eyebrow')" :title="$t('pages.home.sections.quick.title')" :subtitle="$t('pages.home.sections.quick.subtitle')">
         <view class="quick-grid">
           <view v-for="item in pageState.dashboard.quickEntries" :key="item.title" class="quick-tile" @tap="goTo(item.route)">
             <view :class="'tone-pill tone-pill--' + item.tone + ' quick-tile-pill'">
@@ -36,7 +68,7 @@
         </view>
       </AppSection>
 
-      <AppSection eyebrow="流转" title="主流程" subtitle="页面已预留真实接口调用位置，便于后续直接对接后端">
+      <AppSection :eyebrow="$t('pages.home.sections.workflow.eyebrow')" :title="$t('pages.home.sections.workflow.title')" :subtitle="$t('pages.home.sections.workflow.subtitle')">
         <view v-for="(step, index) in pageState.dashboard.workflow" :key="step.title" class="timeline-row">
           <view class="timeline-index">
             <text class="timeline-index-text">{{ index + 1 }}</text>
@@ -53,7 +85,7 @@
         </view>
       </AppSection>
 
-      <AppSection eyebrow="设备态势" title="运行快照" subtitle="设备状态、连接方式与最近更新时间" :tag="pageState.dashboard.devices.length + ' 台'">
+      <AppSection :eyebrow="$t('pages.home.sections.snapshot.eyebrow')" :title="$t('pages.home.sections.snapshot.title')" :subtitle="$t('pages.home.sections.snapshot.subtitle')" :tag="$t('pages.home.sections.snapshot.tag', { count: pageState.dashboard.devices.length })">
         <view v-for="device in pageState.dashboard.devices" :key="device.id" class="device-card">
           <view class="row-between">
             <text class="device-name">{{ device.name }}</text>
@@ -72,7 +104,7 @@
         </view>
       </AppSection>
 
-      <AppSection eyebrow="说明" title="交付重点" subtitle="当前交付以结构清晰、便于扩展为先">
+      <AppSection :eyebrow="$t('pages.home.sections.notice.eyebrow')" :title="$t('pages.home.sections.notice.title')" :subtitle="$t('pages.home.sections.notice.subtitle')">
         <view v-for="notice in pageState.dashboard.notices" :key="notice" class="notice-row">
           <view class="notice-dot"></view>
           <text class="notice-text">{{ notice }}</text>
@@ -85,6 +117,10 @@
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
 import MetricCard from '@/components/MetricCard/MetricCard.uvue'
+import { ROUTES } from '@/src/constants/routes.uts'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
+import { addAlbumRecord, castAlbumToConnectedDevice } from '@/src/services/album.uts'
+import { connectDevice, fetchDevicePageData } from '@/src/services/device.uts'
 import { fetchHomeDashboard } from '@/src/services/home.uts'
 import { HomeDashboard, createEmptyHomeDashboard } from '@/src/types/models.uts'
 import { openRoute } from '@/src/utils/navigation.uts'
@@ -92,11 +128,23 @@ import { openRoute } from '@/src/utils/navigation.uts'
 const pageState = reactive({
   loading: false,
   dashboard: createEmptyHomeDashboard() as HomeDashboard,
+  pendingAlbumId: '',
+  pendingTitle: '',
+  pendingSource: '',
+  selectedDeviceId: '',
+  selectedDeviceName: '',
+  flowResult: '',
 } as HomePageState)
 
 type HomePageState = {
   loading: boolean
   dashboard: HomeDashboard
+  pendingAlbumId: string
+  pendingTitle: string
+  pendingSource: string
+  selectedDeviceId: string
+  selectedDeviceName: string
+  flowResult: string
 }
 
 async function loadHomeData() {
@@ -106,9 +154,17 @@ async function loadHomeData() {
     // const dashboard = await fetchHomeDashboard({ orgId: currentOrgId.value })
     const dashboard = await fetchHomeDashboard()
     pageState.dashboard = dashboard
+    if (pageState.selectedDeviceId.length == 0) {
+      const deviceData = await fetchDevicePageData()
+      const connectedDevice = deviceData.devices.find((item) => item.connected)
+      if (connectedDevice != null) {
+        pageState.selectedDeviceId = connectedDevice.id
+        pageState.selectedDeviceName = connectedDevice.name
+      }
+    }
   } catch (error) {
     uni.showToast({
-      title: '首页数据加载失败',
+      title: t('pages.home.loadError'),
       icon: 'none',
     })
   }
@@ -119,8 +175,103 @@ function goTo(route: string): void {
   openRoute(route)
 }
 
-onLoad(() => {
+async function captureFromCamera(): Promise<void> {
+  const albumData = await addAlbumRecord('首页拍照-' + Date.now().toString().substring(7), '拍照')
+  if (albumData.items.length > 0) {
+    pageState.pendingAlbumId = albumData.items[0].id
+    pageState.pendingTitle = albumData.items[0].title
+    pageState.pendingSource = '手机拍照'
+    pageState.flowResult = '已生成待投屏图片，请继续选择设备'
+  }
+  uni.showToast({
+    title: '已模拟拍照并写入我的相册',
+    icon: 'success',
+  })
   loadHomeData()
+}
+
+async function pickFromAlbum(): Promise<void> {
+  const albumData = await addAlbumRecord('首页选图-' + Date.now().toString().substring(7), '相册选择')
+  if (albumData.items.length > 0) {
+    pageState.pendingAlbumId = albumData.items[0].id
+    pageState.pendingTitle = albumData.items[0].title
+    pageState.pendingSource = '手机相册'
+    pageState.flowResult = '已从相册选择图片，请继续选择设备'
+  }
+  uni.showToast({
+    title: '已模拟相册选图并写入我的相册',
+    icon: 'success',
+  })
+  loadHomeData()
+}
+
+async function chooseDevice(): Promise<void> {
+  const deviceData = await fetchDevicePageData()
+  let nextDevice = deviceData.devices.find((item) => item.id != pageState.selectedDeviceId)
+  if (nextDevice == null && deviceData.devices.length > 0) {
+    nextDevice = deviceData.devices[0]
+  }
+  if (nextDevice == null) {
+    uni.showToast({
+      title: '暂无可选设备',
+      icon: 'none',
+    })
+    return
+  }
+  await connectDevice(nextDevice.id)
+  pageState.selectedDeviceId = nextDevice.id
+  pageState.selectedDeviceName = nextDevice.name
+  pageState.flowResult = '已切换到目标设备，可继续确认投屏'
+  loadHomeData()
+}
+
+function goPermissions(): void {
+  openRoute(ROUTES.PERMISSIONS)
+}
+
+async function confirmCast(): Promise<void> {
+  if (pageState.pendingAlbumId.length == 0) {
+    uni.showToast({
+      title: '请先拍照或选择相册图片',
+      icon: 'none',
+    })
+    return
+  }
+  if (pageState.selectedDeviceId.length == 0) {
+    uni.showToast({
+      title: '请先选择投屏设备',
+      icon: 'none',
+    })
+    return
+  }
+
+  try {
+    const message = await castAlbumToConnectedDevice(pageState.pendingAlbumId)
+    pageState.flowResult = message
+    pageState.pendingAlbumId = ''
+    pageState.pendingTitle = ''
+    pageState.pendingSource = ''
+    uni.showToast({
+      title: '已完成确认投屏',
+      icon: 'success',
+    })
+    loadHomeData()
+  } catch (error) {
+    pageState.flowResult = error as string
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+function refreshPage(): void {
+  applyPageTitle('nav.home')
+  loadHomeData()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
@@ -134,6 +285,30 @@ onLoad(() => {
 .hero-tag {
   margin-right: 12rpx;
   margin-bottom: 12rpx;
+}
+
+.flow-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+
+.flow-button {
+  width: 48%;
+  margin-bottom: 14rpx;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-button--primary {
+  margin-left: 2%;
+}
+
+.flow-preview {
+  margin-top: 16rpx;
+  padding: 20rpx;
+  border-radius: 22rpx;
+  background-color: rgba(31, 75, 78, 0.04);
 }
 
 .metric-grid {

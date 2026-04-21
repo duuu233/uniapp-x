@@ -2,12 +2,12 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">SCREEN CONTROL</text>
-        <text class="page-title">投屏管理</text>
+        <text class="page-kicker">{{ $t('pages.screen.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.screen.title') }}</text>
         <text class="page-subtitle">{{ pageState.screen.summary }}</text>
       </view>
 
-      <AppSection eyebrow="房间" title="投屏房间" subtitle="后续可对接实时在线状态、素材编排和排期能力">
+      <AppSection :eyebrow="$t('pages.screen.rooms.eyebrow')" :title="$t('pages.screen.rooms.title')" :subtitle="$t('pages.screen.rooms.subtitle')">
         <view v-for="room in pageState.screen.rooms" :key="room.name" class="room-card">
           <view class="row-between">
             <text class="room-title">{{ room.name }}</text>
@@ -20,10 +20,31 @@
         </view>
       </AppSection>
 
-      <AppSection eyebrow="维护" title="实施建议" subtitle="建议把播放策略与屏幕日志拆成独立服务模块">
+      <AppSection :eyebrow="$t('pages.screen.tips.eyebrow')" :title="$t('pages.screen.tips.title')" :subtitle="$t('pages.screen.tips.subtitle')">
         <view v-for="tip in pageState.screen.tips" :key="tip" class="tip-row">
           <view class="tip-dot"></view>
           <text class="tip-text">{{ tip }}</text>
+        </view>
+      </AppSection>
+
+      <AppSection eyebrow="记录" title="投屏记录" subtitle="统一查看成功 / 失败投屏，并支持重试和删除">
+        <view v-for="record in pageState.screen.records" :key="record.id" class="record-card">
+          <view class="row-between">
+            <text class="room-title">{{ record.title }}</text>
+            <view :class="'tone-pill tone-pill--' + record.statusTone">
+              <text :class="'tone-pill-text tone-pill-text--' + record.statusTone">{{ record.status }}</text>
+            </view>
+          </view>
+          <text class="room-mode">{{ record.deviceName }} · {{ record.createdAt }}</text>
+          <text class="room-desc">{{ record.summary }}</text>
+          <view class="record-actions">
+            <view class="ghost-button record-action" @tap="retryRecord(record.id)">
+              <text class="ghost-button-text">重试</text>
+            </view>
+            <view class="ghost-button record-action" @tap="removeRecord(record.id)">
+              <text class="ghost-button-text">删除</text>
+            </view>
+          </view>
         </view>
       </AppSection>
     </view>
@@ -32,7 +53,8 @@
 
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
-import { fetchScreenPageData } from '@/src/services/system.uts'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
+import { deleteCastRecord, fetchScreenPageData, retryCastRecord } from '@/src/services/system.uts'
 import { ScreenPageData, createEmptyScreenPageData } from '@/src/types/models.uts'
 
 const pageState = reactive({
@@ -54,15 +76,43 @@ async function loadScreenData() {
     pageState.screen = screenData
   } catch (error) {
     uni.showToast({
-      title: '投屏数据加载失败',
+      title: t('pages.screen.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-onLoad(() => {
+async function retryRecord(recordId: string): Promise<void> {
+  try {
+    pageState.screen = await retryCastRecord(recordId)
+    uni.showToast({
+      title: '已完成投屏重试',
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+async function removeRecord(recordId: string): Promise<void> {
+  pageState.screen = await deleteCastRecord(recordId)
+  uni.showToast({
+    title: '投屏记录已删除',
+    icon: 'success',
+  })
+}
+
+function refreshPage(): void {
+  applyPageTitle('nav.screen')
   loadScreenData()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
@@ -96,6 +146,27 @@ onLoad(() => {
   font-size: 24rpx;
   line-height: 1.6;
   color: $app-muted;
+}
+
+.record-card {
+  margin-bottom: 16rpx;
+  padding-top: 12rpx;
+  padding-bottom: 18rpx;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(213, 204, 190, 0.7);
+}
+
+.record-actions {
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-top: 14rpx;
+}
+
+.record-action {
+  margin-right: 14rpx;
+  align-items: center;
+  justify-content: center;
 }
 
 .tip-row {

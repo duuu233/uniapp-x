@@ -1,0 +1,35 @@
+import { getAboutPageDataMock, getAgreementPageDataMock, getContactPageDataMock, getPrivacyPageDataMock } from '@/src/mock/content.uts'
+import { request } from '@/src/network/http.uts'
+import { StaticContentPageData } from '@/src/types/models.uts'
+
+export function fetchAboutPageData() : Promise<StaticContentPageData> {
+  return request<StaticContentPageData>({
+    path: '/content/about',
+    method: 'GET',
+    mockData: getAboutPageDataMock(),
+  })
+}
+
+export function fetchContactPageData() : Promise<StaticContentPageData> {
+  return request<StaticContentPageData>({
+    path: '/content/contact',
+    method: 'GET',
+    mockData: getContactPageDataMock(),
+  })
+}
+
+export function fetchPrivacyPageData() : Promise<StaticContentPageData> {
+  return request<StaticContentPageData>({
+    path: '/content/privacy',
+    method: 'GET',
+    mockData: getPrivacyPageDataMock(),
+  })
+}
+
+export function fetchAgreementPageData() : Promise<StaticContentPageData> {
+  return request<StaticContentPageData>({
+    path: '/content/agreement',
+    method: 'GET',
+    mockData: getAgreementPageDataMock(),
+  })
+}

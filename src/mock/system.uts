@@ -1,165 +1,248 @@
-import { GuidePageData, PermissionPageData, ScreenPageData, SettingsPageData } from '@/src/types/models.uts'
+import { ROUTES } from '@/src/constants/routes.uts'
+import { getLocale } from '@/src/i18n/index.uts'
+import { getMockState } from '@/src/mock/state.uts'
+import { GuidePageData, InfoLink, PermissionPageData, ScreenPageData, SettingsPageData } from '@/src/types/models.uts'
 
-export function getScreenPageDataMock(): ScreenPageData {
+function createSupportLinks() : Array<InfoLink> {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    return [
+      { id: 'about', title: 'About', description: 'Product positioning and current delivery scope.', route: ROUTES.ABOUT, tone: 'primary' },
+      { id: 'contact', title: 'Contact', description: 'Business support and implementation contact info.', route: ROUTES.CONTACT, tone: 'neutral' },
+      { id: 'privacy', title: 'Privacy', description: 'Data handling notes for account, album and device flows.', route: ROUTES.PRIVACY, tone: 'warning' },
+      { id: 'agreement', title: 'Agreement', description: 'Terms for demo account and content usage.', route: ROUTES.AGREEMENT, tone: 'neutral' },
+    ]
+  }
+
+  if (locale == 'ja-JP') {
+    return [
+      { id: 'about', title: '关于', description: '製品の位置付けと今回の実装範囲を確認します。', route: ROUTES.ABOUT, tone: 'primary' },
+      { id: 'contact', title: '联系方式', description: '業務支援と導入窓口を確認します。', route: ROUTES.CONTACT, tone: 'neutral' },
+      { id: 'privacy', title: '隐私政策', description: '账号、相册、端末フローのデータ取扱いを確認します。', route: ROUTES.PRIVACY, tone: 'warning' },
+      { id: 'agreement', title: '用户协议', description: 'demo 利用時の規約を確認します。', route: ROUTES.AGREEMENT, tone: 'neutral' },
+    ]
+  }
+
+  return [
+    { id: 'about', title: '关于我们', description: '了解产品定位与当前交付范围。', route: ROUTES.ABOUT, tone: 'primary' },
+    { id: 'contact', title: '联系方式', description: '查看业务支持和实施联系方式。', route: ROUTES.CONTACT, tone: 'neutral' },
+    { id: 'privacy', title: '隐私政策', description: '查看账号、相册和设备流程的数据处理说明。', route: ROUTES.PRIVACY, tone: 'warning' },
+    { id: 'agreement', title: '用户协议', description: '查看 demo 阶段下账号和内容使用约束。', route: ROUTES.AGREEMENT, tone: 'neutral' },
+  ]
+}
+
+function createSessionActions() : Array<InfoLink> {
+  const locale = getLocale()
+  if (locale == 'en-US') {
+    return [
+      { id: 'logout', title: 'Logout', description: 'Close the current session and return to login.', route: ROUTES.LOGOUT, tone: 'warning' },
+      { id: 'delete-account', title: 'Delete Account', description: 'Reset the current mock account and clear its demo state.', route: ROUTES.DELETE_ACCOUNT, tone: 'warning' },
+    ]
+  }
+
+  if (locale == 'ja-JP') {
+    return [
+      { id: 'logout', title: '退出登录', description: '現在のセッションを終了してログインページへ戻ります。', route: ROUTES.LOGOUT, tone: 'warning' },
+      { id: 'delete-account', title: '用户注销', description: '現在の mock アカウントと演示状態をリセットします。', route: ROUTES.DELETE_ACCOUNT, tone: 'warning' },
+    ]
+  }
+
+  return [
+    { id: 'logout', title: '退出登录', description: '退出当前账号并返回登录页。', route: ROUTES.LOGOUT, tone: 'warning' },
+    { id: 'delete-account', title: '用户注销', description: '注销当前账号并重置 mock 数据。', route: ROUTES.DELETE_ACCOUNT, tone: 'warning' },
+  ]
+}
+
+export function getScreenPageDataMock() : ScreenPageData {
+  const state = getMockState()
+  const locale = getLocale()
+
+  if (locale == 'en-US') {
+    return {
+      summary: 'Manage room mode and cast history together so failed records can be retried or removed quickly.',
+      rooms: state.rooms,
+      tips: [
+        'Separate room strategy, playback policy and logs into independent services later.',
+        'Failed records should be retried only after verifying the target device connection.',
+      ],
+      records: state.castRecords,
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      summary: 'ルームモードと投屏履歴をまとめて管理し、失敗記録の再試行や削除をすばやく行えます。',
+      rooms: state.rooms,
+      tips: [
+        'ルーム戦略、再生方針、ログは今後独立サービスへ切り出す想定です。',
+        '失敗記録の再試行前に、対象端末の接続状態を再確認してください。',
+      ],
+      records: state.castRecords,
+    }
+  }
+
   return {
-    summary: '投屏管理页统一管理房间、输出模式与当前占用状态，便于活动现场快速切换展示内容。',
-    rooms: [
-      {
-        name: '总部品牌展厅',
-        mode: '欢迎页轮播',
-        deviceCount: '2 台',
-        status: '运行中',
-        statusTone: 'success',
-        description: '用于访客接待与品牌展示，支持静默切换素材。',
-      },
-      {
-        name: '6F 多功能厅',
-        mode: '会议镜像',
-        deviceCount: '3 台',
-        status: '待排期',
-        statusTone: 'warning',
-        description: '适配宣讲、培训和内部例会的大屏联动场景。',
-      },
-      {
-        name: '浦东体验店',
-        mode: '商品演示',
-        deviceCount: '1 台',
-        status: '在线',
-        statusTone: 'primary',
-        description: '可远程切换演示内容并查看设备在线状态。',
-      },
-    ],
+    summary: '统一管理房间模式和投屏记录，便于快速重试失败记录或删除无效记录。',
+    rooms: state.rooms,
     tips: [
-      '建议把房间、设备分组与企业组织结构做映射，降低后期维护成本。',
-      '播放素材和投屏日志建议独立成服务模块，避免页面层直接处理大体积数据。',
+      '后续建议把房间策略、播放策略和日志拆成独立服务模块。',
+      '失败记录重试前应先确认目标设备连接状态。',
     ],
+    records: state.castRecords,
   }
 }
 
-export function getGuidePageDataMock(): GuidePageData {
+export function getGuidePageDataMock() : GuidePageData {
+  const state = getMockState()
+  const locale = getLocale()
+  const categories = ['全部', '演示大屏', '会议平板', '移动终端']
+
+  if (locale == 'en-US') {
+    return {
+      summary: 'Read operation help by device category, instead of browsing one long page of mixed instructions.',
+      categories,
+      sections: state.guideSections,
+      contact: 'Need help? Contact ops@clearmirror.example',
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      summary: '端末カテゴリごとに操作ガイドを確認でき、混在した長文を追わずに必要な内容へ到達できます。',
+      categories,
+      sections: state.guideSections,
+      contact: '支援が必要な場合は ops@clearmirror.example へ連絡してください。',
+    }
+  }
+
   return {
-    summary: '操作指南以关键流程为中心，不堆砌细碎说明，优先保证新用户首日可用。',
-    sections: [
-      {
-        title: '登录与首页',
-        description: '完成账号登录后，首页展示设备态势、快捷入口和重点提醒。',
-        points: [
-          '先核对个人信息与企业身份状态。',
-          '从首页高频入口进入相册、设备或权限中心。',
-        ],
-      },
-      {
-        title: '绑定设备',
-        description: '建议优先扫码绑定，其次蓝牙发现，最后使用 SN 号手动录入。',
-        points: [
-          '绑定后立刻补充位置、负责人和投屏分组。',
-          '出现异常时先检查蓝牙、定位与相机权限。',
-        ],
-      },
-      {
-        title: '相册管理',
-        description: '相册默认展示最近记录，并可扩展审核、标签和批量归档能力。',
-        points: [
-          '大图上传与压缩策略放在请求层统一处理。',
-          '相册筛选条件建议沉淀到 service 层而不是页面组件里。',
-        ],
-      },
-      {
-        title: '投屏管理',
-        description: '投屏房间与设备分组统一维护，适合活动、门店和总部展示场景。',
-        points: [
-          '房间模式建议预置模板，减少频繁人工配置。',
-          '播放内容和房间状态建议接入后台实时数据源。',
-        ],
-      },
-    ],
-    contact: '如需协助，可联系企业管理员或运维支持邮箱：ops@clearmirror.example',
+    summary: '支持按设备分类查看帮助文档，无需在一整页混合说明中反复查找。',
+    categories,
+    sections: state.guideSections,
+    contact: '如需协助，可联系 ops@clearmirror.example',
   }
 }
 
-export function getPermissionPageDataMock(): PermissionPageData {
+export function getPermissionPageDataMock() : PermissionPageData {
+  const locale = getLocale()
+
+  if (locale == 'en-US') {
+    return {
+      summary: 'Permission checks are centralized here so camera, album, location and Bluetooth flows stay consistent.',
+      permissions: [
+        { title: 'Camera', description: 'Used for capture and QR binding.', status: 'Enabled', statusTone: 'success', actionLabel: 'Recheck' },
+        { title: 'Album', description: 'Used for choosing local images before casting.', status: 'Enabled', statusTone: 'success', actionLabel: 'View Notes' },
+        { title: 'Location', description: 'Used for Bluetooth discovery and on-site attribution.', status: 'Pending', statusTone: 'warning', actionLabel: 'Enable' },
+        { title: 'Bluetooth', description: 'Used for nearby device discovery and switching.', status: 'Enabled', statusTone: 'primary', actionLabel: 'Rescan' },
+        { title: 'Notifications', description: 'Used for sync and casting alerts.', status: 'Recommended', statusTone: 'neutral', actionLabel: 'Later' },
+      ],
+      note: 'Platform checks should stay inside a dedicated adapter or composable instead of being duplicated in page components.',
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      summary: '権限確認をここへ集約し、カメラ、アルバム、位置情報、Bluetooth の挙動を統一します。',
+      permissions: [
+        { title: 'カメラ权限', description: '撮影と QR 登録に使用します。', status: '有効', statusTone: 'success', actionLabel: '再確認' },
+        { title: '相册权限', description: '投屏前の画像選択に使用します。', status: '有効', statusTone: 'success', actionLabel: '说明を見る' },
+        { title: '位置权限', description: 'Bluetooth 検出と現場位置補完に使用します。', status: '確認待ち', statusTone: 'warning', actionLabel: '有効化' },
+        { title: 'Bluetooth 权限', description: '近くの端末検出と切替に使用します。', status: '有効', statusTone: 'primary', actionLabel: '再扫描' },
+        { title: '通知权限', description: '同期と投屏提醒に使用します。', status: '推奨', statusTone: 'neutral', actionLabel: '後で対応' },
+      ],
+      note: 'ページ側に分散させず、専用の適配レイヤーへまとめるのが安全です。',
+    }
+  }
+
   return {
-    summary: '权限中心用于沉淀拍摄、相册、定位、蓝牙和通知权限状态，避免在各业务页重复校验。',
+    summary: '集中管理相机、相册、定位、蓝牙和通知权限状态，避免业务页面重复校验。',
     permissions: [
-      {
-        title: '相机权限',
-        description: '用于现场拍摄与二维码识别。',
-        status: '已开启',
-        statusTone: 'success',
-        actionLabel: '重新校验',
-      },
-      {
-        title: '相册权限',
-        description: '用于从本地相册选择图片并上传。',
-        status: '已开启',
-        statusTone: 'success',
-        actionLabel: '查看说明',
-      },
-      {
-        title: '定位权限',
-        description: '用于蓝牙发现与设备位置自动补全。',
-        status: '待确认',
-        statusTone: 'warning',
-        actionLabel: '去开启',
-      },
-      {
-        title: '蓝牙权限',
-        description: '用于搜索附近设备并完成快速绑定。',
-        status: '已开启',
-        statusTone: 'primary',
-        actionLabel: '重新扫描',
-      },
-      {
-        title: '通知权限',
-        description: '用于同步完成、审核结果和异常提醒。',
-        status: '建议开启',
-        statusTone: 'neutral',
-        actionLabel: '稍后处理',
-      },
+      { title: '相机权限', description: '用于拍照和扫码绑定。', status: '已开启', statusTone: 'success', actionLabel: '重新校验' },
+      { title: '相册权限', description: '用于投屏前选择本地图片。', status: '已开启', statusTone: 'success', actionLabel: '查看说明' },
+      { title: '定位权限', description: '用于蓝牙发现和现场归属补全。', status: '待确认', statusTone: 'warning', actionLabel: '去开启' },
+      { title: '蓝牙权限', description: '用于搜索附近设备并切换连接。', status: '已开启', statusTone: 'primary', actionLabel: '重新扫描' },
+      { title: '通知权限', description: '用于同步和投屏提醒。', status: '建议开启', statusTone: 'neutral', actionLabel: '稍后处理' },
     ],
-    note: '权限校验建议封装为独立 composable 或平台适配层，避免页面重复写平台判断。',
+    note: '建议将平台权限检测封装在独立适配层或 composable 中，不要散落在页面里。',
   }
 }
 
-export function getSettingsPageDataMock(): SettingsPageData {
+export function getSettingsPageDataMock() : SettingsPageData {
+  const state = getMockState()
+  const locale = getLocale()
+  const supportLinks = createSupportLinks()
+  const sessionActions = createSessionActions()
+
+  if (locale == 'en-US') {
+    return {
+      versionName: '1.1.0-mock',
+      lastSync: 'Today 09:40',
+      groups: [
+        {
+          title: 'Notifications And Sync',
+          items: [
+            { id: 'notification', title: 'System Notifications', description: 'Receive review results, sync state and device alerts.', enabled: state.settings.notification },
+            { id: 'auto-sync', title: 'Auto Sync', description: 'Sync albums and device data automatically on Wi-Fi.', enabled: state.settings.autoSync },
+          ],
+        },
+        {
+          title: 'Display And Security',
+          items: [
+            { id: 'screen-protect', title: 'Screen Protection', description: 'Require confirmation before casting to sensitive rooms.', enabled: state.settings.screenProtect },
+            { id: 'biometric', title: 'Biometric Check', description: 'Add a second confirmation before opening device and company settings.', enabled: state.settings.biometric },
+          ],
+        },
+      ],
+      supportLinks,
+      sessionActions,
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      versionName: '1.1.0-mock',
+      lastSync: '今日 09:40',
+      groups: [
+        {
+          title: '通知と同期',
+          items: [
+            { id: 'notification', title: 'システム通知', description: '審査結果、同期状態、端末アラートを受け取ります。', enabled: state.settings.notification },
+            { id: 'auto-sync', title: '自動同期', description: 'Wi-Fi 環境でアルバムと端末データを自動同期します。', enabled: state.settings.autoSync },
+          ],
+        },
+        {
+          title: '表示と安全',
+          items: [
+            { id: 'screen-protect', title: '投屏保護', description: '機密ルームへの投屏前に確認を要求します。', enabled: state.settings.screenProtect },
+            { id: 'biometric', title: '生体認証', description: '端末設定や企業設定の前に二次確認を追加します。', enabled: state.settings.biometric },
+          ],
+        },
+      ],
+      supportLinks,
+      sessionActions,
+    }
+  }
+
   return {
-    versionName: '1.0.0-mock',
+    versionName: '1.1.0-mock',
     lastSync: '今天 09:40',
     groups: [
       {
         title: '通知与同步',
         items: [
-          {
-            id: 'notification',
-            title: '系统通知',
-            description: '接收审核结果、同步状态和设备异常提醒。',
-            enabled: true,
-          },
-          {
-            id: 'auto-sync',
-            title: '自动同步',
-            description: '在 Wi-Fi 环境下自动同步图片与设备数据。',
-            enabled: true,
-          },
+          { id: 'notification', title: '系统通知', description: '接收审核结果、同步状态和设备异常提醒。', enabled: state.settings.notification },
+          { id: 'auto-sync', title: '自动同步', description: '在 Wi-Fi 环境下自动同步相册和设备数据。', enabled: state.settings.autoSync },
         ],
       },
       {
         title: '展示与安全',
         items: [
-          {
-            id: 'screen-protect',
-            title: '投屏安全保护',
-            description: '对敏感房间开启确认弹窗与超时断开机制。',
-            enabled: true,
-          },
-          {
-            id: 'biometric',
-            title: '生物识别校验',
-            description: '进入我的设备和企业设置时进行二次确认。',
-            enabled: false,
-          },
+          { id: 'screen-protect', title: '投屏安全保护', description: '对敏感房间投屏前增加确认保护。', enabled: state.settings.screenProtect },
+          { id: 'biometric', title: '生物识别校验', description: '进入设备设置和企业信息前执行二次确认。', enabled: state.settings.biometric },
         ],
       },
     ],
+    supportLinks,
+    sessionActions,
   }
 }

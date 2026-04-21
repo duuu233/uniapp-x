@@ -1,0 +1,40 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">CONTENT</text>
+        <text class="page-title">{{ pageState.article.title }}</text>
+        <text class="page-subtitle">{{ pageState.article.summary }}</text>
+      </view>
+
+      <view v-for="section in pageState.article.sections" :key="section.title" class="surface-card">
+        <text class="surface-title">{{ section.title }}</text>
+        <text class="surface-subtitle">{{ section.content }}</text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import { fetchAgreementPageData } from '@/src/services/content.uts'
+import { StaticContentPageData, createEmptyStaticContentPageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  article: createEmptyStaticContentPageData() as StaticContentPageData,
+} as ArticlePageState)
+
+type ArticlePageState = {
+  article: StaticContentPageData
+}
+
+async function loadArticle(): Promise<void> {
+  pageState.article = await fetchAgreementPageData()
+  uni.setNavigationBarTitle({
+    title: pageState.article.title,
+  })
+}
+
+onShow(() => {
+  loadArticle()
+})
+</script>

@@ -1,11 +1,106 @@
 import { getAlbumPageDataMock } from '@/src/mock/album.uts'
+import { createAlbumRecord, createCastRecord, createTimeLabel, getMockState } from '@/src/mock/state.uts'
 import { request } from '@/src/network/http.uts'
-import { AlbumPageData } from '@/src/types/models.uts'
+import { AlbumItem, AlbumPageData } from '@/src/types/models.uts'
 
 export function fetchAlbumPageData(): Promise<AlbumPageData> {
   return request<AlbumPageData>({
     path: '/albums',
     method: 'GET',
     mockData: getAlbumPageDataMock(),
+  })
+}
+
+export function addAlbumRecord(title: string, sourceTag: string): Promise<AlbumPageData> {
+  return new Promise<AlbumPageData>((resolve) => {
+    const state = getMockState()
+    let connectedDevice = state.devices.find((item) => item.connected)
+    if (connectedDevice == null && state.devices.length > 0) {
+      connectedDevice = state.devices[0]
+    }
+    setTimeout(() => {
+      state.albums.unshift(createAlbumRecord(title, sourceTag, connectedDevice != null ? connectedDevice.name : '未分配设备'))
+      resolve(getAlbumPageDataMock())
+    }, 180)
+  })
+}
+
+export function deleteAlbumItems(ids: Array<string>): Promise<AlbumPageData> {
+  return new Promise<AlbumPageData>((resolve, reject) => {
+    const state = getMockState()
+    let hasBlockedItem = false
+    for (const item of state.albums) {
+      let matched = false
+      for (const id of ids) {
+        if (item.id == id) {
+          matched = true
+          break
+        }
+      }
+      if (matched && !item.uploadedByCurrentUser) {
+        hasBlockedItem = true
+        break
+      }
+    }
+    if (hasBlockedItem) {
+      reject('只能删除自己上传的照片')
+      return
+    }
+
+    setTimeout(() => {
+      const nextAlbums = [] as Array<AlbumItem>
+      for (const item of state.albums) {
+        let matched = false
+        for (const id of ids) {
+          if (item.id == id) {
+            matched = true
+            break
+          }
+        }
+        if (!matched) {
+          nextAlbums.push(item)
+        }
+      }
+      state.albums = nextAlbums
+      const connectedDevice = state.devices.find((item) => item.connected)
+      if (connectedDevice != null) {
+        connectedDevice.memoryLabel = '已同步清理相框照片，剩余 76%'
+      }
+      resolve(getAlbumPageDataMock())
+    }, 180)
+  })
+}
+
+export function castAlbumToConnectedDevice(albumId: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const state = getMockState()
+    const album = state.albums.find((item) => item.id == albumId)
+    if (album == null) {
+      reject('未找到相册记录')
+      return
+    }
+
+    let device = state.devices.find((item) => item.connected)
+    if (device == null && state.devices.length > 0) {
+      device = state.devices[0]
+    }
+    if (device == null) {
+      reject('暂无可用设备')
+      return
+    }
+    if (device.memoryLabel.indexOf('满') >= 0) {
+      reject('设备相框存储已满，请先清理相框照片或联系所有者')
+      return
+    }
+
+    setTimeout(() => {
+      album.status = '已投屏'
+      album.statusTone = 'success'
+      album.summary = '已完成预览并投屏到当前连接设备。'
+      device.updatedAt = createTimeLabel()
+      device.memoryLabel = '相框已写入新照片，剩余 12%'
+      state.castRecords.unshift(createCastRecord(album.title, device.name, 'success', '由我的相册发起的单张投屏记录。', '投屏成功'))
+      resolve('已投屏到 ' + device.name)
+    }, 220)
   })
 }

@@ -1,77 +1,132 @@
+import { getLocale } from '@/src/i18n/index.uts'
+import { getMockState } from '@/src/mock/state.uts'
 import { CompanyPageData, ProfilePageData } from '@/src/types/models.uts'
 
-export function getProfilePageDataMock(): ProfilePageData {
+export function getProfilePageDataMock() : ProfilePageData {
+  const state = getMockState()
+  const locale = getLocale()
+
+  if (locale == 'en-US') {
+    return {
+      title: 'Unified Identity',
+      description: 'Manage editable account data, WeChat binding hints and email updates in one place.',
+      tags: ['Company Member', state.profile.wechatBound ? 'WeChat Linked' : 'Link WeChat', 'SSO Ready'],
+      form: state.profile,
+      helpers: [
+        'Nickname and avatar can be edited for app login.',
+        'WeChat nickname is kept as the mini-program reference.',
+      ],
+      fields: [
+        { label: 'Display Name', value: state.profile.displayName, helper: 'Used for device ownership, album uploads and screen operations.' },
+        { label: 'Email', value: state.profile.email, helper: 'Used for app login, verification codes and important notifications.' },
+        { label: 'Phone', value: state.profile.phone, helper: 'Reserved for WeChat binding and operational alerts.' },
+        { label: 'Employee ID', value: state.profile.employeeId, helper: 'Should stay aligned with the enterprise directory.' },
+        { label: 'Role', value: state.profile.role, helper: 'Controls device, album and casting permissions.' },
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      title: '統一アイデンティティ情報',
+      description: '編集可能なアカウント情報、WeChat 連携ヒント、メール更新を一か所で管理します。',
+      tags: ['企業メンバー', state.profile.wechatBound ? 'WeChat 連携済み' : 'WeChat 未連携', 'SSO 対応'],
+      form: state.profile,
+      helpers: [
+        'app ログイン用のニックネームとアバターを編集できます。',
+        'WeChat ニックネームは小程序側の参照値として保持します。',
+      ],
+      fields: [
+        { label: '昵称', value: state.profile.displayName, helper: '端末担当、相冊アップロード、投屏操作時の表示名です。' },
+        { label: '邮箱', value: state.profile.email, helper: 'app ログイン、認証コード送信、重要通知に使用します。' },
+        { label: '手机号', value: state.profile.phone, helper: 'WeChat 連携と運用通知に利用します。' },
+        { label: '员工 ID', value: state.profile.employeeId, helper: '企業ディレクトリとの整合を推奨します。' },
+        { label: '角色', value: state.profile.role, helper: '端末、相冊、投屏の権限に影響します。' },
+      ],
+    }
+  }
+
   return {
     title: '统一身份信息',
-    description: '个人资料与企业组织关系拆开维护，便于后续扩展到审批、消息通知和设备负责人流转。',
-    tags: ['企业成员', '已实名', '支持 SSO'],
+    description: '集中管理昵称、头像、邮箱、手机号、员工 ID 与微信绑定信息。',
+    tags: ['企业成员', state.profile.wechatBound ? '已绑定微信' : '未绑定微信', '支持 SSO'],
+    form: state.profile,
+    helpers: [
+      'app 登录支持自定义昵称、头像缩写与邮箱绑定。',
+      '小程序侧昵称和头像可作为微信授权信息参考。',
+    ],
     fields: [
-      {
-        label: '姓名',
-        value: '王安然',
-        helper: '用于设备负责人、相册上传人和投屏房间管理员展示。',
-      },
-      {
-        label: '手机号',
-        value: '138 0000 8201',
-        helper: '作为登录账号与异常通知的默认接收号码。',
-      },
-      {
-        label: '员工 ID',
-        value: 'CM-1024',
-        helper: '建议与企业通讯录或 IAM 系统保持一致。',
-      },
-      {
-        label: '角色',
-        value: '平台主管',
-        helper: '拥有设备纳管、相册查看和投屏管理权限。',
-      },
-      {
-        label: '邮箱',
-        value: 'anan.wang@clearmirror.example',
-        helper: '接收周报与重要权限变更提醒。',
-      },
+      { label: '昵称', value: state.profile.displayName, helper: '用于设备负责人、相册上传人和投屏房间管理员展示。' },
+      { label: '邮箱', value: state.profile.email, helper: '用于 app 登录、验证码验证和重要提醒。' },
+      { label: '手机号', value: state.profile.phone, helper: '用于微信授权绑定和异常通知。' },
+      { label: '员工 ID', value: state.profile.employeeId, helper: '建议与企业通讯录或 IAM 系统保持一致。' },
+      { label: '角色', value: state.profile.role, helper: '决定设备纳管、相册查看和投屏管理权限。' },
     ],
   }
 }
 
-export function getCompanyPageDataMock(): CompanyPageData {
+export function getCompanyPageDataMock() : CompanyPageData {
+  const state = getMockState()
+  const locale = getLocale()
+
+  if (locale == 'en-US') {
+    return {
+      companyName: 'ClearMirror Digital Technology Co., Ltd.',
+      status: 'Approved',
+      statusTone: 'success',
+      completionRate: 88,
+      fields: [
+        { label: 'Unified Social Credit Code', value: '91310000MA1XXXXXXX', status: 'Verified', statusTone: 'success' },
+        { label: 'Business Contact', value: state.profile.displayName + ' / ' + state.profile.phone, status: 'Maintained', statusTone: 'primary' },
+        { label: 'Registered Address', value: 'No. 88 Zhangjiang Road, Pudong, Shanghai', status: 'Synced', statusTone: 'neutral' },
+        { label: 'Industry Tags', value: 'Retail Display / Enterprise Digitalization', status: 'Can Improve', statusTone: 'warning' },
+      ],
+      checklist: [
+        'Business license has been uploaded and approved',
+        'Admin email and phone are already bound',
+        'Device permissions can now be assigned to owner and user roles',
+        'Invoice and contract archive fields are still recommended',
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      companyName: '上海澄鏡デジタルテクノロジー有限公司',
+      status: '審査通過',
+      statusTone: 'success',
+      completionRate: 88,
+      fields: [
+        { label: '統一社会信用コード', value: '91310000MA1XXXXXXX', status: '確認済み', statusTone: 'success' },
+        { label: '企業連絡先', value: state.profile.displayName + ' / ' + state.profile.phone, status: '更新済み', statusTone: 'primary' },
+        { label: '登録住所', value: '上海市浦東新区張江路 88 号', status: '同期済み', statusTone: 'neutral' },
+        { label: '業界タグ', value: '小売展示 / 企業デジタル化', status: '要改善', statusTone: 'warning' },
+      ],
+      checklist: [
+        '営業許可証はアップロード済みで審査通過済み',
+        '管理者のメールと電話番号は紐付け済み',
+        '端末権限は所有者 / 使用者で管理できます',
+        '請求情報と契約アーカイブ項目の追加を推奨',
+      ],
+    }
+  }
+
   return {
     companyName: '上海澄镜数字科技有限公司',
     status: '审核通过',
     statusTone: 'success',
-    completionRate: 86,
+    completionRate: 88,
     fields: [
-      {
-        label: '统一社会信用代码',
-        value: '91310000MA1XXXXXXX',
-        status: '已校验',
-        statusTone: 'success',
-      },
-      {
-        label: '企业联系人',
-        value: '陈亦辰 / 186 0216 8890',
-        status: '已维护',
-        statusTone: 'primary',
-      },
-      {
-        label: '注册地址',
-        value: '上海市浦东新区张江路 88 号',
-        status: '已同步',
-        statusTone: 'neutral',
-      },
-      {
-        label: '行业标签',
-        value: '零售展示 / 企业数字化',
-        status: '可完善',
-        statusTone: 'warning',
-      },
+      { label: '统一社会信用代码', value: '91310000MA1XXXXXXX', status: '已校验', statusTone: 'success' },
+      { label: '企业联系人', value: state.profile.displayName + ' / ' + state.profile.phone, status: '已维护', statusTone: 'primary' },
+      { label: '注册地址', value: '上海市浦东新区张江路 88 号', status: '已同步', statusTone: 'neutral' },
+      { label: '行业标签', value: '零售展示 / 企业数字化', status: '可完善', statusTone: 'warning' },
     ],
     checklist: [
       '营业执照已上传并通过审核',
-      '企业管理员已绑定手机号与邮箱',
-      '设备管理权限已下发到平台主管角色',
-      '建议补充发票信息与合同归档字段',
+      '管理员邮箱和手机号已完成绑定',
+      '设备权限支持所有者 / 使用者双角色配置',
+      '建议继续补充发票信息与合同归档字段',
     ],
   }
 }

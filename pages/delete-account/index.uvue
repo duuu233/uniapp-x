@@ -1,0 +1,99 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">SESSION</text>
+        <text class="page-title">用户注销</text>
+        <text class="page-subtitle">注销会重置当前 mock 用户信息与演示数据，请确认你不再需要当前会话中的注册、设备和投屏记录。</text>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">注销前提示</text>
+        <view class="warning-row" v-for="item in warnings" :key="item">
+          <view class="warning-dot"></view>
+          <text class="warning-text">{{ item }}</text>
+        </view>
+        <view class="primary-button action-button" @tap="submitDeleteAccount">
+          <text class="primary-button-text">{{ pageState.loading ? '注销中...' : '确认注销账号' }}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import { ROUTES } from '@/src/constants/routes.uts'
+import { deleteCurrentUser } from '@/src/services/auth.uts'
+import { relaunchRoute } from '@/src/utils/navigation.uts'
+
+const pageState = reactive({
+  loading: false,
+} as DeleteAccountPageState)
+
+type DeleteAccountPageState = {
+  loading: boolean
+}
+
+const warnings = [
+  '注销后会重置当前 mock 会话中的个人资料、设备接入和投屏记录。',
+  '已上传到我的相册的演示数据会恢复到默认初始状态。',
+  '若只需临时退出，请使用“退出登录”而不是“用户注销”。',
+]
+
+function setTitle(): void {
+  uni.setNavigationBarTitle({
+    title: '用户注销',
+  })
+}
+
+async function submitDeleteAccount(): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+
+  pageState.loading = true
+  await deleteCurrentUser()
+  uni.showToast({
+    title: '账号已注销',
+    icon: 'success',
+  })
+  setTimeout(() => {
+    relaunchRoute(ROUTES.LOGIN)
+  }, 220)
+}
+
+onShow(() => {
+  setTitle()
+})
+</script>
+
+<style lang="scss">
+.warning-row {
+  flex-direction: row;
+  align-items: flex-start;
+  padding-top: 10rpx;
+  padding-bottom: 10rpx;
+}
+
+.warning-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 12rpx;
+  margin-right: 14rpx;
+  border-radius: 6rpx;
+  background-color: $app-warning;
+}
+
+.warning-text {
+  flex: 1;
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+
+.action-button {
+  margin-top: 28rpx;
+  align-items: center;
+  justify-content: center;
+}
+</style>

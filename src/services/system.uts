@@ -1,4 +1,5 @@
 import { getGuidePageDataMock, getPermissionPageDataMock, getScreenPageDataMock, getSettingsPageDataMock } from '@/src/mock/system.uts'
+import { createCastRecord, getMockState } from '@/src/mock/state.uts'
 import { request } from '@/src/network/http.uts'
 import { GuidePageData, PermissionPageData, ScreenPageData, SettingsPageData } from '@/src/types/models.uts'
 
@@ -31,5 +32,52 @@ export function fetchSettingsPageData(): Promise<SettingsPageData> {
     path: '/settings',
     method: 'GET',
     mockData: getSettingsPageDataMock(),
+  })
+}
+
+export function updateSettingItem(settingId: string, enabled: boolean): Promise<SettingsPageData> {
+  return new Promise<SettingsPageData>((resolve) => {
+    const state = getMockState()
+    setTimeout(() => {
+      if (settingId == 'notification') {
+        state.settings.notification = enabled
+      } else if (settingId == 'auto-sync') {
+        state.settings.autoSync = enabled
+      } else if (settingId == 'screen-protect') {
+        state.settings.screenProtect = enabled
+      } else if (settingId == 'biometric') {
+        state.settings.biometric = enabled
+      }
+      resolve(getSettingsPageDataMock())
+    }, 160)
+  })
+}
+
+export function deleteCastRecord(recordId: string): Promise<ScreenPageData> {
+  return new Promise<ScreenPageData>((resolve) => {
+    const state = getMockState()
+    setTimeout(() => {
+      state.castRecords = state.castRecords.filter((item) => item.id != recordId)
+      resolve(getScreenPageDataMock())
+    }, 160)
+  })
+}
+
+export function retryCastRecord(recordId: string): Promise<ScreenPageData> {
+  return new Promise<ScreenPageData>((resolve, reject) => {
+    const state = getMockState()
+    const target = state.castRecords.find((item) => item.id == recordId)
+    if (target == null) {
+      reject('投屏记录不存在')
+      return
+    }
+
+    setTimeout(() => {
+      target.status = '投屏成功'
+      target.statusTone = 'success'
+      target.summary = '已完成重试并推送到当前设备。'
+      state.castRecords.unshift(createCastRecord(target.title, target.deviceName, 'success', '由投屏管理页发起重试。', '投屏成功'))
+      resolve(getScreenPageDataMock())
+    }, 200)
   })
 }

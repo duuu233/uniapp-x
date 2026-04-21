@@ -1,109 +1,138 @@
 import { ROUTES } from '@/src/constants/routes.uts'
+import { getLocale } from '@/src/i18n/index.uts'
+import { getMockState } from '@/src/mock/state.uts'
 import { MineDashboard } from '@/src/types/models.uts'
 
-export function getMineDashboardMock(): MineDashboard {
+export function getMineDashboardMock() : MineDashboard {
+  const state = getMockState()
+  const locale = getLocale()
+  const pendingCount = state.devices.filter((item) => item.statusTone == 'warning').length + state.castRecords.filter((item) => item.statusTone == 'warning').length
+
+  if (locale == 'en-US') {
+    return {
+      userName: state.profile.displayName,
+      role: 'Platform Admin',
+      company: 'ClearMirror Digital',
+      subtitle: 'Manage account, devices, casting records and legal settings from one stable control surface.',
+      avatarText: state.profile.avatarText,
+      stats: [
+        { label: 'Owned Devices', value: state.devices.length.toString(), delta: 'Core assets', note: 'Owner and user permissions are configurable', tone: 'primary' },
+        { label: 'My Albums', value: state.albums.length.toString(), delta: 'Latest uploads', note: 'Supports bulk delete and instant casting', tone: 'success' },
+        { label: 'Pending Tasks', value: pendingCount.toString(), delta: 'Need follow-up', note: 'Includes failed casts and pending access', tone: 'warning' },
+      ],
+      menuGroups: [
+        {
+          title: 'Account',
+          description: 'Edit identity, enterprise contact data and login bindings.',
+          items: [
+            { title: 'Profile', description: 'Edit nickname, avatar text, email and employee identity.', badge: state.profile.wechatBound ? 'WeChat Linked' : 'Link WeChat', route: ROUTES.PROFILE, tone: 'success' },
+            { title: 'Company', description: 'Review enterprise registration and governance checklist.', badge: 'Approved', route: ROUTES.COMPANY, tone: 'primary' },
+            { title: 'Register', description: 'Open the email verification registration page.', badge: 'New', route: ROUTES.REGISTER, tone: 'warning' },
+          ],
+        },
+        {
+          title: 'Assets And Devices',
+          description: 'Operate albums, device onboarding and device switching from the same area.',
+          items: [
+            { title: 'My Album', description: 'Delete your own photos in bulk or cast a single selected item.', badge: state.albums.length.toString() + ' items', route: ROUTES.ALBUM, tone: 'primary' },
+            { title: 'My Devices', description: 'Rename devices, change owners, set SN codes and clear memory.', badge: state.devices.length.toString() + ' devices', route: ROUTES.DEVICE_LIST, tone: 'neutral' },
+            { title: 'Bind Device', description: 'Use QR, Bluetooth or manual SN entry for onboarding.', badge: '3 methods', route: ROUTES.DEVICE_BIND, tone: 'success' },
+          ],
+        },
+        {
+          title: 'System Tools',
+          description: 'Handle cast records, help docs, legal pages and session actions.',
+          items: [
+            { title: 'Screen Control', description: 'Retry or delete failed cast records from one list.', badge: state.castRecords.length.toString() + ' records', route: ROUTES.SCREEN, tone: 'primary' },
+            { title: 'Guide', description: 'Read help docs by device category.', badge: 'Category View', route: ROUTES.GUIDE, tone: 'neutral' },
+            { title: 'Settings', description: 'Manage language, support pages, logout and account deletion.', badge: 'Session', route: ROUTES.SETTINGS, tone: 'warning' },
+          ],
+        },
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      userName: state.profile.displayName,
+      role: 'プラットフォーム管理者',
+      company: state.profile.company,
+      subtitle: 'アカウント、端末、投屏記録、法務設定を同じ操作面から管理できます。',
+      avatarText: state.profile.avatarText,
+      stats: [
+        { label: '担当端末', value: state.devices.length.toString(), delta: '主要資産', note: '所有者 / 使用者権限を設定できます', tone: 'primary' },
+        { label: 'マイアルバム', value: state.albums.length.toString(), delta: '最近のアップロード', note: '一括削除と即時投屏に対応', tone: 'success' },
+        { label: '対応待ち', value: pendingCount.toString(), delta: '要フォロー', note: '失敗投屏と権限待ちを含みます', tone: 'warning' },
+      ],
+      menuGroups: [
+        {
+          title: 'アカウント',
+          description: '本人情報、企業連絡先、ログイン連携を編集します。',
+          items: [
+            { title: 'プロフィール', description: '昵称、头像略称、邮箱、社員情報を編集します。', badge: state.profile.wechatBound ? 'WeChat 連携済み' : 'WeChat 未連携', route: ROUTES.PROFILE, tone: 'success' },
+            { title: '企業登録', description: '企業登録情報とガバナンス項目を確認します。', badge: '審査通過', route: ROUTES.COMPANY, tone: 'primary' },
+            { title: '登録', description: '邮箱验证码による登録ページを開きます。', badge: '新規', route: ROUTES.REGISTER, tone: 'warning' },
+          ],
+        },
+        {
+          title: '資産と端末',
+          description: 'アルバム、端末登録、端末切替を同じ導線で扱えます。',
+          items: [
+            { title: 'マイアルバム', description: '自分の写真を一括削除し、単枚投屏も行えます。', badge: state.albums.length.toString() + ' 件', route: ROUTES.ALBUM, tone: 'primary' },
+            { title: 'マイデバイス', description: '名称編集、所有者変更、SN 設定、一键清空に対応します。', badge: state.devices.length.toString() + ' 台', route: ROUTES.DEVICE_LIST, tone: 'neutral' },
+            { title: 'デバイス登録', description: 'QR、Bluetooth、SN 手動入力に対応します。', badge: '3 方式', route: ROUTES.DEVICE_BIND, tone: 'success' },
+          ],
+        },
+        {
+          title: 'システムツール',
+          description: '投屏記録、ヘルプ、法務ページ、セッション操作をまとめます。',
+          items: [
+            { title: '画面配信', description: '失敗記録の再試行と削除を一覧で処理します。', badge: state.castRecords.length.toString() + ' 件', route: ROUTES.SCREEN, tone: 'primary' },
+            { title: 'ガイド', description: '端末カテゴリ別にヘルプを確認します。', badge: '分類表示', route: ROUTES.GUIDE, tone: 'neutral' },
+            { title: '設定', description: '言語、サポートページ、退出登录、用户注销を管理します。', badge: 'Session', route: ROUTES.SETTINGS, tone: 'warning' },
+          ],
+        },
+      ],
+    }
+  }
+
   return {
-    userName: '王安然',
-    role: '平台主管',
-    company: '上海澄镜数字科技',
-    subtitle: '以账号、设备与系统工具为核心，保持入口稳定且便于权限扩展。',
-    avatarText: 'WA',
+    userName: state.profile.displayName,
+    role: state.profile.role,
+    company: state.profile.company,
+    subtitle: '把账号、设备、投屏记录和法务设置统一放到同一个操作面里，减少跨页来回切换。',
+    avatarText: state.profile.avatarText,
     stats: [
-      {
-        label: '负责设备',
-        value: '12',
-        delta: '核心资产',
-        note: '包含 3 台演示大屏',
-        tone: 'primary',
-      },
-      {
-        label: '本周相册',
-        value: '37',
-        delta: '+11',
-        note: '新增采集记录',
-        tone: 'success',
-      },
-      {
-        label: '待处理事项',
-        value: '04',
-        delta: '优先跟进',
-        note: '权限与绑定异常',
-        tone: 'warning',
-      },
+      { label: '负责设备', value: state.devices.length.toString(), delta: '核心资产', note: '支持所有者 / 使用者权限配置', tone: 'primary' },
+      { label: '我的相册', value: state.albums.length.toString(), delta: '最近上传', note: '支持批量删除与单张投屏', tone: 'success' },
+      { label: '待处理事项', value: pendingCount.toString(), delta: '需跟进', note: '包含投屏失败和待授权设备', tone: 'warning' },
     ],
     menuGroups: [
       {
         title: '账户信息',
-        description: '围绕个人身份与企业主体做统一维护。',
+        description: '集中维护个人资料、企业信息和登录绑定关系。',
         items: [
-          {
-            title: '个人信息',
-            description: '维护姓名、手机号、员工 ID 与角色。',
-            badge: '已实名',
-            route: ROUTES.PROFILE,
-            tone: 'success',
-          },
-          {
-            title: '企业注册',
-            description: '查看企业主体资料与审核状态。',
-            badge: '审核通过',
-            route: ROUTES.COMPANY,
-            tone: 'primary',
-          },
+          { title: '个人信息', description: '编辑昵称、头像缩写、邮箱、手机号和员工信息。', badge: state.profile.wechatBound ? '已绑定微信' : '待绑定微信', route: ROUTES.PROFILE, tone: 'success' },
+          { title: '企业注册', description: '查看企业注册资料和治理清单。', badge: '审核通过', route: ROUTES.COMPANY, tone: 'primary' },
+          { title: '注册账号', description: '打开邮箱验证码注册页面。', badge: '新增', route: ROUTES.REGISTER, tone: 'warning' },
         ],
       },
       {
         title: '资产与设备',
-        description: '聚焦相册、设备和绑定流程的高频入口。',
+        description: '统一处理相册管理、设备接入和设备切换。',
         items: [
-          {
-            title: '我的相册',
-            description: '查看图片记录、标签与同步结果。',
-            badge: '128 张',
-            route: ROUTES.ALBUM,
-            tone: 'primary',
-          },
-          {
-            title: '我的设备',
-            description: '统一查看设备状态、位置和连接方式。',
-            badge: '24 台',
-            route: ROUTES.DEVICE_LIST,
-            tone: 'neutral',
-          },
-          {
-            title: '绑定设备',
-            description: '通过扫码、蓝牙或 SN 号接入新设备。',
-            badge: '标准流程',
-            route: ROUTES.DEVICE_BIND,
-            tone: 'success',
-          },
+          { title: '我的相册', description: '支持多选删除自己上传的照片，并可对单张记录发起投屏。', badge: state.albums.length.toString() + ' 张', route: ROUTES.ALBUM, tone: 'primary' },
+          { title: '我的设备', description: '支持设备名称编辑、所有者设置、SN 码配置和一键清空。', badge: state.devices.length.toString() + ' 台', route: ROUTES.DEVICE_LIST, tone: 'neutral' },
+          { title: '绑定设备', description: '支持扫码、蓝牙发现和 SN 手动录入。', badge: '3 种方式', route: ROUTES.DEVICE_BIND, tone: 'success' },
         ],
       },
       {
         title: '系统工具',
-        description: '沉淀运维、投屏和系统配置能力。',
+        description: '统一查看投屏记录、分类指南和设置会话页。',
         items: [
-          {
-            title: '投屏管理',
-            description: '管理投屏房间、屏幕模式和联动场景。',
-            badge: '8 个房间',
-            route: ROUTES.SCREEN,
-            tone: 'primary',
-          },
-          {
-            title: '操作指南',
-            description: '快速查看绑定、采集与异常排查流程。',
-            badge: '4 个章节',
-            route: ROUTES.GUIDE,
-            tone: 'neutral',
-          },
-          {
-            title: '设置',
-            description: '维护同步、通知、权限提醒与安全策略。',
-            badge: '3 项已开启',
-            route: ROUTES.SETTINGS,
-            tone: 'warning',
-          },
+          { title: '投屏管理', description: '查看成功 / 失败投屏记录，并执行重试或删除。', badge: state.castRecords.length.toString() + ' 条', route: ROUTES.SCREEN, tone: 'primary' },
+          { title: '操作指南', description: '按设备分类查看帮助文档。', badge: '分类查看', route: ROUTES.GUIDE, tone: 'neutral' },
+          { title: '设置', description: '管理语种、关于我们、隐私政策、退出登录和用户注销。', badge: '会话', route: ROUTES.SETTINGS, tone: 'warning' },
         ],
       },
     ],

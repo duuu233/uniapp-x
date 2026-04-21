@@ -2,12 +2,12 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">BIND DEVICE</text>
-        <text class="page-title">绑定设备</text>
+        <text class="page-kicker">{{ $t('pages.deviceBind.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.deviceBind.title') }}</text>
         <text class="page-subtitle">{{ pageState.bindInfo.overview }}</text>
       </view>
 
-      <AppSection eyebrow="流程" title="标准步骤" subtitle="先固化接入流程，再逐步接入扫码和蓝牙能力">
+      <AppSection :eyebrow="$t('pages.deviceBind.steps.eyebrow')" :title="$t('pages.deviceBind.steps.title')" :subtitle="$t('pages.deviceBind.steps.subtitle')">
         <view v-for="(step, index) in pageState.bindInfo.steps" :key="step.title" class="step-row">
           <view class="step-index">
             <text class="step-index-text">{{ index + 1 }}</text>
@@ -24,7 +24,7 @@
         </view>
       </AppSection>
 
-      <AppSection eyebrow="入口" title="绑定方式" subtitle="页面只负责展示，真正的平台能力建议继续下沉到独立模块">
+      <AppSection :eyebrow="$t('pages.deviceBind.methods.eyebrow')" :title="$t('pages.deviceBind.methods.title')" :subtitle="$t('pages.deviceBind.methods.subtitle')">
         <view v-for="item in pageState.bindInfo.methods" :key="item.title" class="method-card">
           <view :class="'tone-pill tone-pill--' + item.tone + ' method-card-pill'">
             <text :class="'tone-pill-text tone-pill-text--' + item.tone">{{ item.actionLabel }}</text>
@@ -32,11 +32,34 @@
           <text class="method-title">{{ item.title }}</text>
           <text class="method-desc">{{ item.description }}</text>
           <text class="method-helper">{{ item.helper }}</text>
+          <view class="ghost-button method-action" @tap="runBindAction(item.title)">
+            <text class="ghost-button-text">立即执行</text>
+          </view>
         </view>
       </AppSection>
 
       <view class="surface-card">
-        <text class="surface-title">实施建议</text>
+        <text class="surface-title">手动录入</text>
+        <text class="surface-subtitle">当扫码或蓝牙不可用时，可输入 SN 码和设备名称完成绑定。</text>
+        <view class="auth-field">
+          <text class="auth-label">设备名称</text>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.manualName" type="text" placeholder="请输入设备名称" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+        <view class="auth-field">
+          <text class="auth-label">SN 码</text>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.manualSn" type="text" placeholder="请输入 SN 码" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+        <view class="primary-button method-submit" @tap="submitManualBind">
+          <text class="primary-button-text">{{ pageState.loading ? '处理中...' : '保存并绑定' }}</text>
+        </view>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">{{ $t('pages.deviceBind.suggestionTitle') }}</text>
         <text class="surface-subtitle">{{ pageState.bindInfo.supportText }}</text>
       </view>
     </view>
@@ -45,17 +68,24 @@
 
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
-import { fetchBindPageData } from '@/src/services/device.uts'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
+import { bindDeviceByBluetooth, bindDeviceByScan, bindDeviceManually, fetchBindPageData } from '@/src/services/device.uts'
 import { BindPageData, createEmptyBindPageData } from '@/src/types/models.uts'
+import { openRoute } from '@/src/utils/navigation.uts'
+import { ROUTES } from '@/src/constants/routes.uts'
 
 const pageState = reactive({
   loading: false,
   bindInfo: createEmptyBindPageData() as BindPageData,
+  manualName: '',
+  manualSn: '',
 } as DeviceBindPageState)
 
 type DeviceBindPageState = {
   loading: boolean
   bindInfo: BindPageData
+  manualName: string
+  manualSn: string
 }
 
 async function loadBindInfo() {
@@ -67,15 +97,72 @@ async function loadBindInfo() {
     pageState.bindInfo = bindInfo
   } catch (error) {
     uni.showToast({
-      title: '绑定信息加载失败',
+      title: t('pages.deviceBind.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-onLoad(() => {
+async function runBindAction(title: string): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+  pageState.loading = true
+  try {
+    let message = ''
+    if (title.indexOf('扫码') >= 0 || title.indexOf('QR') >= 0) {
+      message = await bindDeviceByScan()
+    } else if (title.indexOf('蓝牙') >= 0 || title.indexOf('Bluetooth') >= 0) {
+      message = await bindDeviceByBluetooth()
+    } else {
+      message = '请使用下方手动录入表单完成绑定'
+    }
+    uni.showToast({
+      title: message,
+      icon: 'none',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+async function submitManualBind(): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+  pageState.loading = true
+  try {
+    const message = await bindDeviceManually(pageState.manualSn, pageState.manualName)
+    uni.showToast({
+      title: message,
+      icon: 'none',
+    })
+    pageState.manualName = ''
+    pageState.manualSn = ''
+    setTimeout(() => {
+      openRoute(ROUTES.DEVICE_LIST)
+    }, 220)
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+function refreshPage(): void {
+  applyPageTitle('nav.deviceBind')
   loadBindInfo()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
@@ -157,5 +244,43 @@ onLoad(() => {
   font-size: 22rpx;
   line-height: 1.55;
   color: $app-muted;
+}
+
+.method-action {
+  align-self: flex-start;
+  margin-top: 16rpx;
+}
+
+.auth-field {
+  margin-top: 18rpx;
+}
+
+.auth-label {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: $app-text;
+}
+
+.auth-input-shell {
+  margin-top: 12rpx;
+  padding-left: 20rpx;
+  padding-right: 20rpx;
+  border-radius: 22rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(31, 75, 78, 0.1);
+  background-color: #ffffff;
+}
+
+.auth-input {
+  height: 88rpx;
+  font-size: 28rpx;
+  color: $app-text;
+}
+
+.method-submit {
+  margin-top: 22rpx;
+  align-items: center;
+  justify-content: center;
 }
 </style>

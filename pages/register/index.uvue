@@ -1,0 +1,273 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell register-page">
+      <view class="hero-card">
+        <text class="page-kicker">REGISTER</text>
+        <text class="page-title">邮箱验证码注册</text>
+        <text class="page-subtitle">支持昵称、邮箱验证码和密码注册。注册成功后直接进入首页。</text>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">注册信息</text>
+        <text class="surface-subtitle">当前为 mock 演示，验证码会直接通过 toast 返回。</text>
+
+        <view class="auth-field">
+          <text class="auth-label">昵称</text>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.displayName" type="text" placeholder="请输入昵称" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+
+        <view class="auth-field">
+          <text class="auth-label">邮箱</text>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.email" type="text" placeholder="name@company.com" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+
+        <view class="auth-field">
+          <view class="auth-inline-head">
+            <text class="auth-label">验证码</text>
+            <view class="field-toggle" @tap="sendCode">
+              <text class="field-toggle-text">{{ pageState.sendingCode ? '发送中...' : '发送验证码' }}</text>
+            </view>
+          </view>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.code" type="text" placeholder="请输入 6 位验证码" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+
+        <view class="auth-field">
+          <text class="auth-label">密码</text>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.password" type="text" :password="true" placeholder="至少 6 位字符" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+
+        <view class="auth-field">
+          <text class="auth-label">确认密码</text>
+          <view class="auth-input-shell">
+            <input class="auth-input" v-model="pageState.confirmPassword" type="text" :password="true" placeholder="再次输入密码" placeholder-style="color:#8A938B;font-size:14px;" />
+          </view>
+        </view>
+
+        <view class="agreement-row" @tap="toggleAgreement">
+          <view :class="pageState.agreementAccepted ? 'tone-pill tone-pill--primary' : 'tone-pill tone-pill--neutral'">
+            <text :class="pageState.agreementAccepted ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">{{ pageState.agreementAccepted ? '已同意' : '待同意' }}</text>
+          </view>
+          <text class="agreement-text">我已阅读并同意《用户协议》和《隐私政策》</text>
+        </view>
+
+        <view class="primary-button auth-submit" @tap="submitRegister">
+          <text class="primary-button-text">{{ pageState.loading ? '注册中...' : '注册并登录' }}</text>
+        </view>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">已有账号</text>
+        <text class="surface-subtitle">若已拥有账号，可直接返回登录页使用密码或验证码登录。</text>
+        <view class="ghost-button auth-submit" @tap="goLogin">
+          <text class="ghost-button-text">返回登录页</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import { ROUTES } from '@/src/constants/routes.uts'
+import { registerWithEmailCode, requestRegisterCode } from '@/src/services/auth.uts'
+import { relaunchRoute, replaceRoute } from '@/src/utils/navigation.uts'
+
+const pageState = reactive({
+  displayName: '',
+  email: '',
+  code: '',
+  password: '',
+  confirmPassword: '',
+  agreementAccepted: false,
+  sendingCode: false,
+  loading: false,
+} as RegisterPageState)
+
+type RegisterPageState = {
+  displayName: string
+  email: string
+  code: string
+  password: string
+  confirmPassword: string
+  agreementAccepted: boolean
+  sendingCode: boolean
+  loading: boolean
+}
+
+function setTitle(): void {
+  uni.setNavigationBarTitle({
+    title: '注册账号',
+  })
+}
+
+function toggleAgreement(): void {
+  pageState.agreementAccepted = !pageState.agreementAccepted
+}
+
+function validateForm(): string {
+  if (pageState.displayName.trim().length < 2) {
+    return '昵称至少 2 个字符'
+  }
+  if (pageState.email.trim().indexOf('@') <= 0) {
+    return '请输入有效邮箱地址'
+  }
+  if (pageState.code.trim().length != 6) {
+    return '请输入 6 位验证码'
+  }
+  if (pageState.password.length < 6) {
+    return '密码至少 6 位'
+  }
+  if (pageState.password != pageState.confirmPassword) {
+    return '两次输入的密码不一致'
+  }
+  if (!pageState.agreementAccepted) {
+    return '请先同意用户协议和隐私政策'
+  }
+  return ''
+}
+
+async function sendCode(): Promise<void> {
+  if (pageState.sendingCode || pageState.loading) {
+    return
+  }
+  if (pageState.email.trim().indexOf('@') <= 0) {
+    uni.showToast({
+      title: '请先输入有效邮箱地址',
+      icon: 'none',
+    })
+    return
+  }
+
+  pageState.sendingCode = true
+  try {
+    const code = await requestRegisterCode(pageState.email)
+    uni.showToast({
+      title: '演示验证码：' + code,
+      icon: 'none',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.sendingCode = false
+}
+
+async function submitRegister(): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+
+  const errorMessage = validateForm()
+  if (errorMessage.length > 0) {
+    uni.showToast({
+      title: errorMessage,
+      icon: 'none',
+    })
+    return
+  }
+
+  pageState.loading = true
+  try {
+    await registerWithEmailCode(pageState.displayName, pageState.email, pageState.code, pageState.password)
+    uni.showToast({
+      title: '注册成功',
+      icon: 'success',
+    })
+    setTimeout(() => {
+      relaunchRoute(ROUTES.HOME)
+    }, 220)
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+function goLogin(): void {
+  replaceRoute(ROUTES.LOGIN)
+}
+
+onShow(() => {
+  setTitle()
+})
+</script>
+
+<style lang="scss">
+.register-page {
+  padding-bottom: 20rpx;
+}
+
+.auth-field {
+  margin-top: 20rpx;
+}
+
+.auth-label {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: $app-text;
+}
+
+.auth-inline-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field-toggle {
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
+}
+
+.field-toggle-text {
+  font-size: 22rpx;
+  color: $app-primary;
+}
+
+.auth-input-shell {
+  margin-top: 12rpx;
+  padding-left: 20rpx;
+  padding-right: 20rpx;
+  border-radius: 22rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(31, 75, 78, 0.1);
+  background-color: #ffffff;
+}
+
+.auth-input {
+  height: 92rpx;
+  font-size: 28rpx;
+  color: $app-text;
+}
+
+.agreement-row {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 24rpx;
+}
+
+.agreement-text {
+  flex: 1;
+  margin-left: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: $app-muted;
+}
+
+.auth-submit {
+  margin-top: 24rpx;
+  align-items: center;
+  justify-content: center;
+}
+</style>

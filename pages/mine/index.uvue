@@ -7,7 +7,7 @@
             <text class="profile-avatar-text">{{ pageState.dashboard.avatarText }}</text>
           </view>
           <view class="profile-copy">
-            <text class="page-kicker page-kicker--accent">ACCOUNT CENTER</text>
+            <text class="page-kicker page-kicker--accent">{{ $t('pages.mine.kicker') }}</text>
             <text class="page-title page-title--accent">{{ pageState.dashboard.userName }}</text>
             <text class="page-subtitle page-subtitle--accent">{{ pageState.dashboard.role }} · {{ pageState.dashboard.company }}</text>
           </view>
@@ -43,6 +43,7 @@
 
 <script setup lang="uts">
 import MetricCard from '@/components/MetricCard/MetricCard.uvue'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
 import { fetchMineDashboard } from '@/src/services/mine.uts'
 import { MineDashboard, createEmptyMineDashboard } from '@/src/types/models.uts'
 import { openRoute } from '@/src/utils/navigation.uts'
@@ -66,7 +67,7 @@ async function loadMineData() {
     pageState.dashboard = mineDashboard
   } catch (error) {
     uni.showToast({
-      title: '个人中心加载失败',
+      title: t('pages.mine.loadError'),
       icon: 'none',
     })
   }
@@ -77,8 +78,13 @@ function goTo(route: string): void {
   openRoute(route)
 }
 
-onLoad(() => {
+function refreshPage(): void {
+  applyPageTitle('nav.mine')
   loadMineData()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 

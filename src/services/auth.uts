@@ -1,3 +1,5 @@
+import { getMockState, issueVerificationCode, markLoggedIn, markLoggedOut, resetMockState } from '@/src/mock/state.uts'
+
 function buildDemoDisplayName(email: string): string {
   const atIndex = email.indexOf('@')
   if (atIndex <= 0) {
@@ -8,6 +10,7 @@ function buildDemoDisplayName(email: string): string {
 
 export function loginWithEmail(email: string, password: string): Promise<boolean> {
   return new Promise<boolean>((resolve, reject) => {
+    const state = getMockState()
     const normalizedEmail = email.trim()
     if (normalizedEmail.length == 0) {
       reject('Please enter your email address')
@@ -20,8 +23,143 @@ export function loginWithEmail(email: string, password: string): Promise<boolean
 
     setTimeout(() => {
       const displayName = buildDemoDisplayName(normalizedEmail)
+      markLoggedIn(normalizedEmail, password)
+      state.profile.displayName = displayName
+      state.profile.avatarText = displayName.substring(0, 2).toUpperCase()
       console.log('mock login success for ' + displayName)
       resolve(true)
     }, 420)
+  })
+}
+
+export function requestLoginCode(email: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const normalizedEmail = email.trim()
+    if (normalizedEmail.length == 0 || normalizedEmail.indexOf('@') <= 0) {
+      reject('Please enter a valid email address')
+      return
+    }
+
+    setTimeout(() => {
+      const code = issueVerificationCode('login')
+      resolve(code)
+    }, 260)
+  })
+}
+
+export function loginWithEmailCode(email: string, code: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const state = getMockState()
+    const normalizedEmail = email.trim()
+    if (normalizedEmail.length == 0 || normalizedEmail.indexOf('@') <= 0) {
+      reject('Please enter a valid email address')
+      return
+    }
+    if (code.trim().length != 6) {
+      reject('Verification code must be 6 digits')
+      return
+    }
+    if (code.trim() != state.auth.loginCode) {
+      reject('Verification code is invalid')
+      return
+    }
+
+    setTimeout(() => {
+      const displayName = buildDemoDisplayName(normalizedEmail)
+      markLoggedIn(normalizedEmail, state.auth.password)
+      state.profile.displayName = displayName
+      state.profile.avatarText = displayName.substring(0, 2).toUpperCase()
+      resolve(true)
+    }, 320)
+  })
+}
+
+export function requestRegisterCode(email: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const normalizedEmail = email.trim()
+    if (normalizedEmail.length == 0 || normalizedEmail.indexOf('@') <= 0) {
+      reject('Please enter a valid email address')
+      return
+    }
+
+    setTimeout(() => {
+      const code = issueVerificationCode('register')
+      resolve(code)
+    }, 260)
+  })
+}
+
+export function registerWithEmailCode(displayName: string, email: string, code: string, password: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const state = getMockState()
+    const normalizedEmail = email.trim()
+    if (displayName.trim().length < 2) {
+      reject('Display name must be at least 2 characters')
+      return
+    }
+    if (normalizedEmail.length == 0 || normalizedEmail.indexOf('@') <= 0) {
+      reject('Please enter a valid email address')
+      return
+    }
+    if (code.trim() != state.auth.registerCode) {
+      reject('Verification code is invalid')
+      return
+    }
+    if (password.length < 6) {
+      reject('Password must be at least 6 characters')
+      return
+    }
+
+    setTimeout(() => {
+      state.profile.displayName = displayName.trim()
+      state.profile.avatarText = state.profile.displayName.substring(0, 2).toUpperCase()
+      state.profile.email = normalizedEmail
+      markLoggedIn(normalizedEmail, password)
+      resolve(true)
+    }, 360)
+  })
+}
+
+export function logoutCurrentUser(): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    setTimeout(() => {
+      markLoggedOut()
+      resolve(true)
+    }, 220)
+  })
+}
+
+export function deleteCurrentUser(): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    setTimeout(() => {
+      resetMockState()
+      markLoggedOut()
+      resolve(true)
+    }, 260)
+  })
+}
+
+export function fetchCurrentUserEmail(): string {
+  return getMockState().profile.email
+}
+
+export function loginWithWechat(phoneNumber: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const normalizedPhone = phoneNumber.trim()
+    if (normalizedPhone.length < 11) {
+      reject('请先提供已授权手机号')
+      return
+    }
+
+    const state = getMockState()
+    setTimeout(() => {
+      state.profile.wechatBound = true
+      state.profile.wechatNickname = '微信授权用户'
+      state.profile.phone = normalizedPhone
+      state.profile.displayName = '微信用户'
+      state.profile.avatarText = 'WX'
+      markLoggedIn(state.profile.email, state.auth.password)
+      resolve(true)
+    }, 260)
   })
 }

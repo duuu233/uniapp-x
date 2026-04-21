@@ -2,8 +2,8 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">DEVICE LIBRARY</text>
-        <text class="page-title">我的设备</text>
+        <text class="page-kicker">{{ $t('pages.deviceList.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.deviceList.title') }}</text>
         <text class="page-subtitle">{{ pageState.deviceData.overview }}</text>
         <view class="tag-row">
           <view v-for="tag in pageState.deviceData.tags" :key="tag" class="tag-chip">
@@ -12,7 +12,51 @@
         </view>
       </view>
 
-      <AppSection eyebrow="清单" title="设备列表" subtitle="后续可在 service 层增加分页、筛选和关键字检索">
+      <view class="surface-card">
+        <text class="surface-title">设备控制台</text>
+        <text class="surface-subtitle">支持连接切换、名称编辑、所有者配置、SN 设置、一键清空和轮播模式开关。</text>
+        <view v-if="pageState.activeDeviceId.length > 0">
+          <view class="auth-field">
+            <text class="auth-label">设备名称</text>
+            <view class="auth-input-shell">
+              <input class="auth-input" v-model="pageState.editorName" type="text" placeholder="请输入设备名称" placeholder-style="color:#8A938B;font-size:14px;" />
+            </view>
+          </view>
+          <view class="auth-field">
+            <text class="auth-label">所有者</text>
+            <view class="auth-input-shell">
+              <input class="auth-input" v-model="pageState.editorOwner" type="text" placeholder="请输入所有者名称" placeholder-style="color:#8A938B;font-size:14px;" />
+            </view>
+          </view>
+          <view class="auth-field">
+            <text class="auth-label">SN 码</text>
+            <view class="auth-input-shell">
+              <input class="auth-input" v-model="pageState.editorSn" type="text" placeholder="请输入 SN 码" placeholder-style="color:#8A938B;font-size:14px;" />
+            </view>
+          </view>
+          <view class="permission-row">
+            <view :class="pageState.editorPermission == '所有者' ? 'tone-pill tone-pill--primary permission-pill' : 'tone-pill tone-pill--neutral permission-pill'" @tap="setEditorPermission('所有者')">
+              <text :class="pageState.editorPermission == '所有者' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">所有者</text>
+            </view>
+            <view :class="pageState.editorPermission == '使用者' ? 'tone-pill tone-pill--primary permission-pill' : 'tone-pill tone-pill--neutral permission-pill'" @tap="setEditorPermission('使用者')">
+              <text :class="pageState.editorPermission == '使用者' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">使用者</text>
+            </view>
+            <view :class="pageState.editorCarouselEnabled ? 'tone-pill tone-pill--success permission-pill' : 'tone-pill tone-pill--neutral permission-pill'" @tap="toggleCarousel">
+              <text :class="pageState.editorCarouselEnabled ? 'tone-pill-text tone-pill-text--success' : 'tone-pill-text tone-pill-text--neutral'">{{ pageState.editorCarouselEnabled ? '轮播已开启' : '轮播已关闭' }}</text>
+            </view>
+          </view>
+          <view class="action-row">
+            <view class="ghost-button action-button" @tap="clearMemory">
+              <text class="ghost-button-text">一键清空</text>
+            </view>
+            <view class="primary-button action-button" @tap="saveDeviceEditor">
+              <text class="primary-button-text">{{ pageState.saving ? '保存中...' : '保存设备配置' }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <AppSection :eyebrow="$t('pages.deviceList.list.eyebrow')" :title="$t('pages.deviceList.list.title')" :subtitle="$t('pages.deviceList.list.subtitle')">
         <view v-for="device in pageState.deviceData.devices" :key="device.id" class="device-row">
           <view class="row-between">
             <text class="device-name">{{ device.name }}</text>
@@ -28,6 +72,15 @@
             <text class="device-meta-divider">·</text>
             <text class="device-meta-text">{{ device.updatedAt }}</text>
           </view>
+          <text class="device-note">所有者：{{ device.ownerName }} · 权限：{{ device.permissionLabel }} · {{ device.memoryLabel }} · {{ device.canReuseSn ? 'SN 可重复使用' : 'SN 单次使用' }}</text>
+          <view class="device-actions">
+            <view :class="device.connected ? 'tone-pill tone-pill--success action-pill' : 'tone-pill tone-pill--neutral action-pill'" @tap="connectCurrentDevice(device.id)">
+              <text :class="device.connected ? 'tone-pill-text tone-pill-text--success' : 'tone-pill-text tone-pill-text--neutral'">{{ device.connected ? '当前已连接' : '切换连接' }}</text>
+            </view>
+            <view class="ghost-button device-action-button" @tap="editDevice(device.id)">
+              <text class="ghost-button-text">编辑设备</text>
+            </view>
+          </view>
         </view>
       </AppSection>
     </view>
@@ -36,17 +89,45 @@
 
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
-import { fetchDevicePageData } from '@/src/services/device.uts'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
+import { clearDeviceMemory, connectDevice, fetchDevicePageData, renameDevice, toggleDeviceCarousel, updateDeviceOwner, updateDevicePermission, updateDeviceSn } from '@/src/services/device.uts'
 import { DevicePageData, createEmptyDevicePageData } from '@/src/types/models.uts'
 
 const pageState = reactive({
   loading: false,
+  saving: false,
   deviceData: createEmptyDevicePageData() as DevicePageData,
+  activeDeviceId: '',
+  editorName: '',
+  editorOwner: '',
+  editorSn: '',
+  editorPermission: '所有者',
+  editorCarouselEnabled: false,
 } as DeviceListPageState)
 
 type DeviceListPageState = {
   loading: boolean
+  saving: boolean
   deviceData: DevicePageData
+  activeDeviceId: string
+  editorName: string
+  editorOwner: string
+  editorSn: string
+  editorPermission: string
+  editorCarouselEnabled: boolean
+}
+
+function applyEditor(deviceId: string): void {
+  const target = pageState.deviceData.devices.find((item) => item.id == deviceId)
+  if (target == null) {
+    return
+  }
+  pageState.activeDeviceId = target.id
+  pageState.editorName = target.name
+  pageState.editorOwner = target.ownerName
+  pageState.editorSn = target.serialNumber
+  pageState.editorPermission = target.permissionLabel
+  pageState.editorCarouselEnabled = target.carouselEnabled
 }
 
 async function loadDeviceData() {
@@ -56,17 +137,113 @@ async function loadDeviceData() {
     // const deviceData = await fetchDevicePageData({ pageNo: 1, keyword: keyword.value })
     const deviceData = await fetchDevicePageData()
     pageState.deviceData = deviceData
+    if (pageState.activeDeviceId.length == 0 && deviceData.devices.length > 0) {
+      applyEditor(deviceData.connectedDeviceId.length > 0 ? deviceData.connectedDeviceId : deviceData.devices[0].id)
+    } else if (pageState.activeDeviceId.length > 0) {
+      applyEditor(pageState.activeDeviceId)
+    }
   } catch (error) {
     uni.showToast({
-      title: '设备列表加载失败',
+      title: t('pages.deviceList.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-onLoad(() => {
+function editDevice(deviceId: string): void {
+  applyEditor(deviceId)
+  uni.showToast({
+    title: '已切换到设备编辑态',
+    icon: 'none',
+  })
+}
+
+async function connectCurrentDevice(deviceId: string): Promise<void> {
+  try {
+    pageState.deviceData = await connectDevice(deviceId)
+    applyEditor(deviceId)
+    uni.showToast({
+      title: '设备连接已切换',
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+function setEditorPermission(permission: string): void {
+  pageState.editorPermission = permission
+}
+
+async function toggleCarousel(): Promise<void> {
+  if (pageState.activeDeviceId.length == 0) {
+    return
+  }
+  try {
+    pageState.deviceData = await toggleDeviceCarousel(pageState.activeDeviceId)
+    applyEditor(pageState.activeDeviceId)
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+async function clearMemory(): Promise<void> {
+  if (pageState.activeDeviceId.length == 0) {
+    return
+  }
+  try {
+    pageState.deviceData = await clearDeviceMemory(pageState.activeDeviceId)
+    applyEditor(pageState.activeDeviceId)
+    uni.showToast({
+      title: '设备存储已清空',
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+async function saveDeviceEditor(): Promise<void> {
+  if (pageState.activeDeviceId.length == 0 || pageState.saving) {
+    return
+  }
+  pageState.saving = true
+  try {
+    pageState.deviceData = await renameDevice(pageState.activeDeviceId, pageState.editorName)
+    pageState.deviceData = await updateDeviceOwner(pageState.activeDeviceId, pageState.editorOwner)
+    pageState.deviceData = await updateDevicePermission(pageState.activeDeviceId, pageState.editorPermission)
+    pageState.deviceData = await updateDeviceSn(pageState.activeDeviceId, pageState.editorSn)
+    applyEditor(pageState.activeDeviceId)
+    uni.showToast({
+      title: '设备配置已保存',
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.saving = false
+}
+
+function refreshPage(): void {
+  applyPageTitle('nav.deviceList')
   loadDeviceData()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
@@ -88,6 +265,56 @@ onLoad(() => {
 .tag-chip-text {
   font-size: 22rpx;
   color: $app-primary;
+}
+
+.auth-field {
+  margin-top: 18rpx;
+}
+
+.auth-label {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: $app-text;
+}
+
+.auth-input-shell {
+  margin-top: 12rpx;
+  padding-left: 20rpx;
+  padding-right: 20rpx;
+  border-radius: 22rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(31, 75, 78, 0.1);
+  background-color: #ffffff;
+}
+
+.auth-input {
+  height: 88rpx;
+  font-size: 28rpx;
+  color: $app-text;
+}
+
+.permission-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.permission-pill {
+  margin-right: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.action-row {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 10rpx;
+}
+
+.action-button {
+  width: 48%;
+  align-items: center;
+  justify-content: center;
 }
 
 .device-row {
@@ -127,5 +354,30 @@ onLoad(() => {
 .device-meta-divider {
   margin-left: 8rpx;
   margin-right: 8rpx;
+}
+
+.device-note {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: $app-muted;
+}
+
+.device-actions {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.action-pill {
+  align-items: center;
+  justify-content: center;
+}
+
+.device-action-button {
+  width: 34%;
+  align-items: center;
+  justify-content: center;
 }
 </style>

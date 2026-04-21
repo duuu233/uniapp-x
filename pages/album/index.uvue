@@ -2,27 +2,40 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">ALBUM CENTER</text>
-        <text class="page-title">我的相册</text>
+        <text class="page-kicker">{{ $t('pages.album.kicker') }}</text>
+        <text class="page-title">{{ $t('pages.album.title') }}</text>
         <text class="page-subtitle">{{ pageState.album.overview }}</text>
       </view>
 
       <view class="summary-grid">
         <view class="summary-box">
-          <text class="summary-label">总记录</text>
+          <text class="summary-label">{{ $t('pages.album.summaryTotal') }}</text>
           <text class="summary-value">{{ pageState.album.summary.totalCount }}</text>
         </view>
         <view class="summary-box">
-          <text class="summary-label">待同步</text>
+          <text class="summary-label">{{ $t('pages.album.summaryPending') }}</text>
           <text class="summary-value">{{ pageState.album.summary.pendingCount }}</text>
         </view>
         <view class="summary-box">
-          <text class="summary-label">已同步</text>
+          <text class="summary-label">{{ $t('pages.album.summarySynced') }}</text>
           <text class="summary-value">{{ pageState.album.summary.syncedCount }}</text>
         </view>
       </view>
 
-      <AppSection eyebrow="记录" title="最近上传" subtitle="此处可继续扩展搜索、筛选、批量操作和审核状态">
+      <view class="surface-card">
+        <text class="surface-title">相册操作</text>
+        <text class="surface-subtitle">支持多选删除自己上传的照片，并可对单张记录直接发起投屏。</text>
+        <view class="action-row">
+          <view class="ghost-button action-button" @tap="clearSelection">
+            <text class="ghost-button-text">清空选择</text>
+          </view>
+          <view class="primary-button action-button" @tap="deleteSelected">
+            <text class="primary-button-text">删除所选 {{ pageState.selectedIds.length }}</text>
+          </view>
+        </view>
+      </view>
+
+      <AppSection :eyebrow="$t('pages.album.records.eyebrow')" :title="$t('pages.album.records.title')" :subtitle="$t('pages.album.records.subtitle')">
         <view v-for="item in pageState.album.items" :key="item.id" class="album-card">
           <view class="row-between">
             <text class="album-title">{{ item.title }}</text>
@@ -37,10 +50,22 @@
               <text class="album-tag-text">{{ tag }}</text>
             </view>
           </view>
+          <text class="album-owner-tip">{{ item.uploadedByCurrentUser ? '当前用户上传，可删除' : '非当前用户上传，仅支持查看和投屏' }}</text>
+          <view class="action-row album-action-row">
+            <view :class="isSelected(item.id) ? 'tone-pill tone-pill--primary action-toggle' : 'tone-pill tone-pill--neutral action-toggle'" @tap="toggleSelect(item.id)">
+              <text :class="isSelected(item.id) ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">{{ isSelected(item.id) ? '已选择' : '选择' }}</text>
+            </view>
+            <view class="ghost-button album-action" @tap="castItem(item.id)">
+              <text class="ghost-button-text">投屏</text>
+            </view>
+            <view class="ghost-button album-action" @tap="deleteItem(item.id, item.uploadedByCurrentUser)">
+              <text class="ghost-button-text">删除</text>
+            </view>
+          </view>
         </view>
       </AppSection>
 
-      <AppSection eyebrow="存储策略" title="缓存与扩展" subtitle="建议把压缩、上传、归档策略收敛到 service 和 upload 模块">
+      <AppSection :eyebrow="$t('pages.album.storage.eyebrow')" :title="$t('pages.album.storage.title')" :subtitle="$t('pages.album.storage.subtitle')">
         <text class="hint-text">{{ pageState.album.storageHint }}</text>
       </AppSection>
     </view>
@@ -49,17 +74,20 @@
 
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
-import { fetchAlbumPageData } from '@/src/services/album.uts'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
+import { castAlbumToConnectedDevice, deleteAlbumItems, fetchAlbumPageData } from '@/src/services/album.uts'
 import { AlbumPageData, createEmptyAlbumPageData } from '@/src/types/models.uts'
 
 const pageState = reactive({
   loading: false,
   album: createEmptyAlbumPageData() as AlbumPageData,
+  selectedIds: [] as Array<string>,
 } as AlbumPageState)
 
 type AlbumPageState = {
   loading: boolean
   album: AlbumPageData
+  selectedIds: Array<string>
 }
 
 async function loadAlbumData() {
@@ -71,15 +99,105 @@ async function loadAlbumData() {
     pageState.album = albumData
   } catch (error) {
     uni.showToast({
-      title: '相册数据加载失败',
+      title: t('pages.album.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-onLoad(() => {
+function isSelected(id: string): boolean {
+  for (const selectedId of pageState.selectedIds) {
+    if (selectedId == id) {
+      return true
+    }
+  }
+  return false
+}
+
+function toggleSelect(id: string): void {
+  if (isSelected(id)) {
+    pageState.selectedIds = pageState.selectedIds.filter((item) => item != id)
+    return
+  }
+  pageState.selectedIds.push(id)
+}
+
+function clearSelection(): void {
+  pageState.selectedIds = []
+}
+
+async function deleteSelected(): Promise<void> {
+  if (pageState.selectedIds.length == 0) {
+    uni.showToast({
+      title: '请先选择需要删除的照片',
+      icon: 'none',
+    })
+    return
+  }
+
+  try {
+    pageState.album = await deleteAlbumItems(pageState.selectedIds)
+    pageState.selectedIds = []
+    uni.showToast({
+      title: '已删除所选照片',
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+async function deleteItem(id: string, canDelete: boolean): Promise<void> {
+  if (!canDelete) {
+    uni.showToast({
+      title: '只能删除自己上传的照片',
+      icon: 'none',
+    })
+    return
+  }
+
+  try {
+    pageState.album = await deleteAlbumItems([id])
+    pageState.selectedIds = pageState.selectedIds.filter((item) => item != id)
+    uni.showToast({
+      title: '照片已删除',
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+async function castItem(id: string): Promise<void> {
+  try {
+    const message = await castAlbumToConnectedDevice(id)
+    pageState.album = await fetchAlbumPageData()
+    uni.showToast({
+      title: message,
+      icon: 'success',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+}
+
+function refreshPage(): void {
+  applyPageTitle('nav.album')
   loadAlbumData()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 
@@ -150,6 +268,12 @@ onLoad(() => {
   margin-top: 14rpx;
 }
 
+.album-owner-tip {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: $app-muted;
+}
+
 .album-tag {
   margin-right: 12rpx;
   margin-bottom: 10rpx;
@@ -161,5 +285,33 @@ onLoad(() => {
 .album-tag-text {
   font-size: 22rpx;
   color: $app-primary;
+}
+
+.action-row {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.action-button {
+  width: 48%;
+  align-items: center;
+  justify-content: center;
+}
+
+.album-action-row {
+  margin-top: 16rpx;
+  align-items: center;
+}
+
+.album-action {
+  width: 30%;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-toggle {
+  width: 34%;
+  align-items: center;
+  justify-content: center;
 }
 </style>

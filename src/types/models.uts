@@ -50,6 +50,25 @@ export type DeviceCard = {
   updatedAt: string
 }
 
+export type ManagedDevice = {
+  id: string
+  name: string
+  location: string
+  status: string
+  statusTone: Tone
+  connection: string
+  battery: string
+  updatedAt: string
+  ownerName: string
+  permissionLabel: string
+  serialNumber: string
+  connected: boolean
+  carouselEnabled: boolean
+  memoryLabel: string
+  typeLabel: string
+  canReuseSn: boolean
+}
+
 export type HomeDashboard = {
   greeting: string
   subtitle: string
@@ -99,6 +118,7 @@ export type AlbumItem = {
   statusTone: Tone
   summary: string
   tags: Array<string>
+  uploadedByCurrentUser: boolean
 }
 
 export type AlbumPageData = {
@@ -126,7 +146,9 @@ export type BindPageData = {
 export type DevicePageData = {
   overview: string
   tags: Array<string>
-  devices: Array<DeviceCard>
+  connectedDeviceId: string
+  notes: Array<string>
+  devices: Array<ManagedDevice>
 }
 
 export type InfoField = {
@@ -135,10 +157,24 @@ export type InfoField = {
   helper: string
 }
 
+export type ProfileFormData = {
+  displayName: string
+  avatarText: string
+  wechatNickname: string
+  wechatBound: boolean
+  email: string
+  phone: string
+  employeeId: string
+  role: string
+  company: string
+}
+
 export type ProfilePageData = {
   title: string
   description: string
   tags: Array<string>
+  form: ProfileFormData
+  helpers: Array<string>
   fields: Array<InfoField>
 }
 
@@ -171,9 +207,11 @@ export type ScreenPageData = {
   summary: string
   rooms: Array<ScreenRoom>
   tips: Array<string>
+  records: Array<CastRecord>
 }
 
 export type GuideSection = {
+  category: string
   title: string
   description: string
   points: Array<string>
@@ -181,8 +219,19 @@ export type GuideSection = {
 
 export type GuidePageData = {
   summary: string
+  categories: Array<string>
   sections: Array<GuideSection>
   contact: string
+}
+
+export type CastRecord = {
+  id: string
+  title: string
+  deviceName: string
+  status: string
+  statusTone: Tone
+  createdAt: string
+  summary: string
 }
 
 export type PermissionItem = {
@@ -215,6 +264,27 @@ export type SettingsPageData = {
   versionName: string
   lastSync: string
   groups: Array<SettingGroup>
+  supportLinks: Array<InfoLink>
+  sessionActions: Array<InfoLink>
+}
+
+export type InfoLink = {
+  id: string
+  title: string
+  description: string
+  route: string
+  tone: Tone
+}
+
+export type ContentSection = {
+  title: string
+  content: string
+}
+
+export type StaticContentPageData = {
+  title: string
+  summary: string
+  sections: Array<ContentSection>
 }
 
 export function createEmptyHomeDashboard(): HomeDashboard {
@@ -267,6 +337,8 @@ export function createEmptyDevicePageData(): DevicePageData {
   return {
     overview: '',
     tags: [],
+    connectedDeviceId: '',
+    notes: [],
     devices: [],
   }
 }
@@ -276,6 +348,18 @@ export function createEmptyProfilePageData(): ProfilePageData {
     title: '',
     description: '',
     tags: [],
+    form: {
+      displayName: '',
+      avatarText: '',
+      wechatNickname: '',
+      wechatBound: false,
+      email: '',
+      phone: '',
+      employeeId: '',
+      role: '',
+      company: '',
+    },
+    helpers: [],
     fields: [],
   }
 }
@@ -296,12 +380,14 @@ export function createEmptyScreenPageData(): ScreenPageData {
     summary: '',
     rooms: [],
     tips: [],
+    records: [],
   }
 }
 
 export function createEmptyGuidePageData(): GuidePageData {
   return {
     summary: '',
+    categories: [],
     sections: [],
     contact: '',
   }
@@ -320,5 +406,15 @@ export function createEmptySettingsPageData(): SettingsPageData {
     versionName: '',
     lastSync: '',
     groups: [],
+    supportLinks: [],
+    sessionActions: [],
+  }
+}
+
+export function createEmptyStaticContentPageData(): StaticContentPageData {
+  return {
+    title: '',
+    summary: '',
+    sections: [],
   }
 }

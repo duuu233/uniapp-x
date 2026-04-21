@@ -1,4 +1,6 @@
 <script setup lang="uts">
+import { t } from '@/src/i18n/index.uts'
+
 // #ifdef APP-ANDROID || APP-HARMONY
 let firstBackTime = 0
 // #endif
@@ -19,7 +21,7 @@ onAppHide(() => {
 onLastPageBackPress(() => {
   if (firstBackTime == 0) {
     uni.showToast({
-      title: '再按一次退出应用',
+      title: t('app.pressAgainToExit'),
       position: 'bottom',
       icon: 'none',
     })

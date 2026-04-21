@@ -2,20 +2,20 @@
   <scroll-view class="page-scroll" scroll-y="true">
     <view class="page-shell">
       <view class="hero-card">
-        <text class="page-kicker">COMPANY</text>
+        <text class="page-kicker">{{ $t('pages.company.kicker') }}</text>
         <text class="page-title">{{ pageState.company.companyName }}</text>
         <view class="hero-status">
           <view :class="'tone-pill tone-pill--' + pageState.company.statusTone">
             <text :class="'tone-pill-text tone-pill-text--' + pageState.company.statusTone">{{ pageState.company.status }}</text>
           </view>
-          <text class="hero-status-text">资料完成度 {{ pageState.company.completionRate }}%</text>
+          <text class="hero-status-text">{{ $t('pages.company.completionRate', { rate: pageState.company.completionRate }) }}</text>
         </view>
         <view class="progress-track">
           <view class="progress-fill" :style="'width:' + pageState.company.completionRate + '%'"></view>
         </view>
       </view>
 
-      <AppSection eyebrow="主体资料" title="企业注册信息" subtitle="字段状态与审核状态分开展示，便于后续接入审批流">
+      <AppSection :eyebrow="$t('pages.company.fields.eyebrow')" :title="$t('pages.company.fields.title')" :subtitle="$t('pages.company.fields.subtitle')">
         <view v-for="field in pageState.company.fields" :key="field.label" class="info-row">
           <view class="info-row-copy">
             <text class="info-label">{{ field.label }}</text>
@@ -27,7 +27,7 @@
         </view>
       </AppSection>
 
-      <AppSection eyebrow="合规检查" title="上线前建议" subtitle="把经常变化的校验项配置化，而不是直接写死在页面中">
+      <AppSection :eyebrow="$t('pages.company.checklist.eyebrow')" :title="$t('pages.company.checklist.title')" :subtitle="$t('pages.company.checklist.subtitle')">
         <view v-for="item in pageState.company.checklist" :key="item" class="check-row">
           <view class="check-dot"></view>
           <text class="check-text">{{ item }}</text>
@@ -39,6 +39,7 @@
 
 <script setup lang="uts">
 import AppSection from '@/components/AppSection/AppSection.uvue'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
 import { fetchCompanyPageData } from '@/src/services/account.uts'
 import { CompanyPageData, createEmptyCompanyPageData } from '@/src/types/models.uts'
 
@@ -61,15 +62,20 @@ async function loadCompany() {
     pageState.company = company
   } catch (error) {
     uni.showToast({
-      title: '企业资料加载失败',
+      title: t('pages.company.loadError'),
       icon: 'none',
     })
   }
   pageState.loading = false
 }
 
-onLoad(() => {
+function refreshPage(): void {
+  applyPageTitle('nav.company')
   loadCompany()
+}
+
+onShow(() => {
+  refreshPage()
 })
 </script>
 

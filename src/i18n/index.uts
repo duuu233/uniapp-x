@@ -1,0 +1,726 @@
+import { createI18n } from '@/uni_modules/lime-i18n/index.uts'
+
+export type AppLocale = 'zh-CN' | 'en-US' | 'ja-JP'
+
+const DEFAULT_LOCALE : AppLocale = 'zh-CN'
+
+function normalizeLocale(locale : string | null = null) : AppLocale {
+  const value = locale == null ? '' : locale.toLowerCase()
+
+  if (value.indexOf('en') == 0) {
+    return 'en-US'
+  }
+
+  if (value.indexOf('ja') == 0) {
+    return 'ja-JP'
+  }
+
+  return 'zh-CN'
+}
+
+function resolveInitialLocale() : AppLocale {
+  const cachedLocale = uni.getStorageSync('uVueI18nLocale')
+  if (typeof cachedLocale == 'string' && cachedLocale.length > 0) {
+    return normalizeLocale(cachedLocale)
+  }
+
+  return DEFAULT_LOCALE
+}
+
+const messages = {
+  'zh-CN': {
+    app: {
+      pressAgainToExit: '再按一次退出应用',
+    },
+    common: {
+      languages: {
+        zhCn: '简体中文',
+        enUs: 'English',
+        jaJp: '日本語',
+      },
+      labels: {
+        appOnly: '仅 App',
+        mockData: '模拟数据',
+      },
+      status: {
+        syncing: '同步中',
+        updated: '已更新',
+        enabled: '已开启',
+        disabled: '已关闭',
+        current: '当前',
+      },
+    },
+    nav: {
+      login: '邮箱登录',
+      home: '首页',
+      mine: '我的',
+      album: '我的相册',
+      deviceBind: '绑定设备',
+      deviceList: '我的设备',
+      profile: '个人信息',
+      company: '企业注册',
+      screen: '投屏管理',
+      guide: '操作指南',
+      settings: '设置',
+      permissions: '权限中心',
+    },
+    pages: {
+      login: {
+        kicker: '邮箱接入',
+        title: '登录 ClearMirror',
+        subtitle: '覆盖 iOS、Android 与 HarmonyOS 的设备、相册和投屏业务登录层。',
+        formEyebrow: '工作区登录',
+        formTitle: '使用邮箱和密码登录',
+        formDescription: '当前为演示模式，输入任意合法邮箱和至少 6 位密码即可进入。',
+        emailLabel: '邮箱',
+        emailPlaceholder: 'name@company.com',
+        passwordLabel: '密码',
+        passwordPlaceholder: '至少 6 位字符',
+        showPassword: '显示',
+        hidePassword: '隐藏',
+        signIn: '登录',
+        signingIn: '登录中...',
+        useDemo: '填充演示账号',
+        forgotPassword: '忘记密码',
+        noteTitle: '跨平台就绪',
+        noteCopy: '页面基于 uni-app x 原生组件与 UTS 状态管理实现，同一套结构可运行在 iOS、Android 与 HarmonyOS。',
+        emailRequired: '请输入邮箱',
+        emailInvalid: '请输入有效邮箱地址',
+        passwordRequired: '请输入密码',
+        passwordTooShort: '密码至少 6 位',
+        resetHint: '此处接入找回密码接口',
+        loginSuccess: '登录成功',
+        loginFailure: '暂时无法登录，请稍后重试',
+      },
+      home: {
+        kicker: '设备协同',
+        sections: {
+          quick: {
+            eyebrow: '工作台',
+            title: '高频入口',
+            subtitle: '围绕采集、权限、设备和投屏的统一入口',
+          },
+          workflow: {
+            eyebrow: '流转',
+            title: '主流程',
+            subtitle: '页面已预留真实接口调用位置，便于后续直接对接后端',
+          },
+          snapshot: {
+            eyebrow: '设备态势',
+            title: '运行快照',
+            subtitle: '设备状态、连接方式与最近更新时间',
+            tag: '{count} 台',
+          },
+          notice: {
+            eyebrow: '说明',
+            title: '交付重点',
+            subtitle: '当前交付以结构清晰、便于扩展为先',
+          },
+        },
+        loadError: '首页数据加载失败',
+      },
+      mine: {
+        kicker: '账户中心',
+        loadError: '个人中心加载失败',
+      },
+      album: {
+        kicker: '相册中心',
+        title: '我的相册',
+        summaryTotal: '总记录',
+        summaryPending: '待同步',
+        summarySynced: '已同步',
+        records: {
+          eyebrow: '记录',
+          title: '最近上传',
+          subtitle: '此处可继续扩展搜索、筛选、批量操作和审核状态',
+        },
+        storage: {
+          eyebrow: '存储策略',
+          title: '缓存与扩展',
+          subtitle: '建议把压缩、上传、归档策略收敛到 service 和 upload 模块',
+        },
+        loadError: '相册数据加载失败',
+      },
+      deviceBind: {
+        kicker: '设备绑定',
+        title: '绑定设备',
+        steps: {
+          eyebrow: '流程',
+          title: '标准步骤',
+          subtitle: '先固化接入流程，再逐步接入扫码和蓝牙能力',
+        },
+        methods: {
+          eyebrow: '入口',
+          title: '绑定方式',
+          subtitle: '页面只负责展示，真正的平台能力建议继续下沉到独立模块',
+        },
+        suggestionTitle: '实施建议',
+        loadError: '绑定信息加载失败',
+      },
+      deviceList: {
+        kicker: '设备库',
+        title: '我的设备',
+        list: {
+          eyebrow: '清单',
+          title: '设备列表',
+          subtitle: '后续可在 service 层增加分页、筛选和关键字检索',
+        },
+        loadError: '设备列表加载失败',
+      },
+      profile: {
+        kicker: '个人资料',
+        fields: {
+          eyebrow: '资料',
+          title: '字段明细',
+          subtitle: '后续可扩展为表单编辑、上传头像和角色申请',
+        },
+        edit: '编辑资料',
+        submit: '提交更新',
+        editHint: '已预留资料编辑入口',
+        submitHint: '已预留提交接口',
+        loadError: '个人资料加载失败',
+      },
+      company: {
+        kicker: '企业信息',
+        completionRate: '资料完成度 {rate}%',
+        fields: {
+          eyebrow: '主体资料',
+          title: '企业注册信息',
+          subtitle: '字段状态与审核状态分开展示，便于后续接入审批流',
+        },
+        checklist: {
+          eyebrow: '合规检查',
+          title: '上线前建议',
+          subtitle: '把经常变化的校验项配置化，而不是直接写死在页面中',
+        },
+        loadError: '企业资料加载失败',
+      },
+      screen: {
+        kicker: '投屏控制',
+        title: '投屏管理',
+        rooms: {
+          eyebrow: '房间',
+          title: '投屏房间',
+          subtitle: '后续可对接实时在线状态、素材编排和排期能力',
+        },
+        tips: {
+          eyebrow: '维护',
+          title: '实施建议',
+          subtitle: '建议把播放策略与屏幕日志拆成独立服务模块',
+        },
+        loadError: '投屏数据加载失败',
+      },
+      guide: {
+        kicker: '操作指南',
+        title: '操作指南',
+        supportTitle: '联系支持',
+        loadError: '指南加载失败',
+      },
+      permissions: {
+        kicker: '权限管理',
+        title: '权限中心',
+        platform: {
+          eyebrow: '授权状态',
+          title: '平台能力',
+          subtitle: '把权限检测收敛为统一入口，避免各页面散落平台判断',
+        },
+        suggestionTitle: '封装建议',
+        loadError: '权限数据加载失败',
+      },
+      settings: {
+        kicker: '设置',
+        title: '设置',
+        heroSubtitle: '版本 {version} · 最近同步 {lastSync}',
+        language: {
+          title: '语言',
+          subtitle: '选择应用显示语言，切换结果会自动缓存。',
+          current: '当前',
+          changed: '已切换为 {language}',
+        },
+        suggestionTitle: '接入建议',
+        suggestionSubtitle: '设置项建议由后台配置中心驱动，并用本地缓存做兜底，避免不同平台手动维护不一致。',
+        loadError: '设置加载失败',
+      },
+    },
+  },
+  'en-US': {
+    app: {
+      pressAgainToExit: 'Press again to exit',
+    },
+    common: {
+      languages: {
+        zhCn: 'Simplified Chinese',
+        enUs: 'English',
+        jaJp: 'Japanese',
+      },
+      labels: {
+        appOnly: 'App Only',
+        mockData: 'Mock Data',
+      },
+      status: {
+        syncing: 'Syncing',
+        updated: 'Updated',
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        current: 'Current',
+      },
+    },
+    nav: {
+      login: 'Email Login',
+      home: 'Home',
+      mine: 'Mine',
+      album: 'Album',
+      deviceBind: 'Bind Device',
+      deviceList: 'My Devices',
+      profile: 'Profile',
+      company: 'Company',
+      screen: 'Screen Control',
+      guide: 'Guide',
+      settings: 'Settings',
+      permissions: 'Permissions',
+    },
+    pages: {
+      login: {
+        kicker: 'EMAIL ACCESS',
+        title: 'Sign In To ClearMirror',
+        subtitle: 'A quiet login layer for device, album and screen workflows across iOS, Android and HarmonyOS.',
+        formEyebrow: 'Workspace Login',
+        formTitle: 'Use email and password',
+        formDescription: 'Demo mode is enabled. Enter any valid email and a password with at least 6 characters.',
+        emailLabel: 'Email',
+        emailPlaceholder: 'name@company.com',
+        passwordLabel: 'Password',
+        passwordPlaceholder: 'At least 6 characters',
+        showPassword: 'Show',
+        hidePassword: 'Hide',
+        signIn: 'Sign In',
+        signingIn: 'Signing In...',
+        useDemo: 'Use Demo',
+        forgotPassword: 'Forgot Password',
+        noteTitle: 'Cross-Platform Ready',
+        noteCopy: 'Built with uni-app x native components and UTS form state, so the same page structure works on iOS, Android and HarmonyOS.',
+        emailRequired: 'Email is required',
+        emailInvalid: 'Enter a valid email address',
+        passwordRequired: 'Password is required',
+        passwordTooShort: 'Password must be at least 6 characters',
+        resetHint: 'Connect your reset API here',
+        loginSuccess: 'Login success',
+        loginFailure: 'Unable to sign in right now',
+      },
+      home: {
+        kicker: 'DEVICE ORCHESTRATION',
+        sections: {
+          quick: {
+            eyebrow: 'Workspace',
+            title: 'Quick Entry',
+            subtitle: 'A unified entry point for capture, permissions, devices and screen casting',
+          },
+          workflow: {
+            eyebrow: 'Flow',
+            title: 'Core Workflow',
+            subtitle: 'API placeholders are already reserved so the backend can be wired in directly later',
+          },
+          snapshot: {
+            eyebrow: 'Device View',
+            title: 'Live Snapshot',
+            subtitle: 'Device status, connection mode and latest update time',
+            tag: '{count} devices',
+          },
+          notice: {
+            eyebrow: 'Notes',
+            title: 'Delivery Focus',
+            subtitle: 'This delivery prioritizes clear structure and easy extension',
+          },
+        },
+        loadError: 'Failed to load home data',
+      },
+      mine: {
+        kicker: 'ACCOUNT CENTER',
+        loadError: 'Failed to load account center',
+      },
+      album: {
+        kicker: 'ALBUM CENTER',
+        title: 'My Album',
+        summaryTotal: 'Total',
+        summaryPending: 'Pending',
+        summarySynced: 'Synced',
+        records: {
+          eyebrow: 'Records',
+          title: 'Recent Uploads',
+          subtitle: 'You can extend this area with search, filters, bulk actions and review states',
+        },
+        storage: {
+          eyebrow: 'Storage',
+          title: 'Cache And Extension',
+          subtitle: 'Compression, upload and archive policies should stay in service and upload modules',
+        },
+        loadError: 'Failed to load album data',
+      },
+      deviceBind: {
+        kicker: 'BIND DEVICE',
+        title: 'Bind Device',
+        steps: {
+          eyebrow: 'Flow',
+          title: 'Standard Steps',
+          subtitle: 'Stabilize the onboarding flow first, then connect QR and Bluetooth capabilities',
+        },
+        methods: {
+          eyebrow: 'Entry',
+          title: 'Binding Methods',
+          subtitle: 'The page only presents options. Native platform features should remain in dedicated modules',
+        },
+        suggestionTitle: 'Implementation Tips',
+        loadError: 'Failed to load binding info',
+      },
+      deviceList: {
+        kicker: 'DEVICE LIBRARY',
+        title: 'My Devices',
+        list: {
+          eyebrow: 'List',
+          title: 'Device List',
+          subtitle: 'Later you can add paging, filters and keyword search in the service layer',
+        },
+        loadError: 'Failed to load device list',
+      },
+      profile: {
+        kicker: 'PROFILE',
+        fields: {
+          eyebrow: 'Details',
+          title: 'Field Breakdown',
+          subtitle: 'This can later grow into form editing, avatar upload and role applications',
+        },
+        edit: 'Edit Profile',
+        submit: 'Submit Update',
+        editHint: 'Profile edit entry is reserved',
+        submitHint: 'Submit API is reserved',
+        loadError: 'Failed to load profile',
+      },
+      company: {
+        kicker: 'COMPANY',
+        completionRate: 'Completion {rate}%',
+        fields: {
+          eyebrow: 'Entity',
+          title: 'Registration Info',
+          subtitle: 'Field status and review status are separated to support approval flow later',
+        },
+        checklist: {
+          eyebrow: 'Compliance',
+          title: 'Before Go-Live',
+          subtitle: 'Move frequently changing checks into configuration instead of hard-coding them in the page',
+        },
+        loadError: 'Failed to load company info',
+      },
+      screen: {
+        kicker: 'SCREEN CONTROL',
+        title: 'Screen Control',
+        rooms: {
+          eyebrow: 'Rooms',
+          title: 'Cast Rooms',
+          subtitle: 'Later this can connect to real-time online state, playlist orchestration and scheduling',
+        },
+        tips: {
+          eyebrow: 'Maintenance',
+          title: 'Implementation Tips',
+          subtitle: 'Separate playback strategy and screen logs into independent services',
+        },
+        loadError: 'Failed to load screen data',
+      },
+      guide: {
+        kicker: 'GUIDE',
+        title: 'Guide',
+        supportTitle: 'Contact Support',
+        loadError: 'Failed to load guide',
+      },
+      permissions: {
+        kicker: 'PERMISSIONS',
+        title: 'Permissions',
+        platform: {
+          eyebrow: 'Authorization',
+          title: 'Platform Access',
+          subtitle: 'Centralize permission checks so platform logic does not scatter across pages',
+        },
+        suggestionTitle: 'Packaging Advice',
+        loadError: 'Failed to load permissions data',
+      },
+      settings: {
+        kicker: 'SETTINGS',
+        title: 'Settings',
+        heroSubtitle: 'Version {version} · Last sync {lastSync}',
+        language: {
+          title: 'Language',
+          subtitle: 'Choose the app display language. The selection is cached automatically.',
+          current: 'Current',
+          changed: 'Switched to {language}',
+        },
+        suggestionTitle: 'Integration Advice',
+        suggestionSubtitle: 'Settings should be driven by a backend configuration center with local cache as fallback to avoid manual drift across platforms.',
+        loadError: 'Failed to load settings',
+      },
+    },
+  },
+  'ja-JP': {
+    app: {
+      pressAgainToExit: 'もう一度押すと終了します',
+    },
+    common: {
+      languages: {
+        zhCn: '簡体字中国語',
+        enUs: 'English',
+        jaJp: '日本語',
+      },
+      labels: {
+        appOnly: 'App 専用',
+        mockData: 'モックデータ',
+      },
+      status: {
+        syncing: '同期中',
+        updated: '更新済み',
+        enabled: '有効',
+        disabled: '無効',
+        current: '現在',
+      },
+    },
+    nav: {
+      login: 'メールログイン',
+      home: 'ホーム',
+      mine: 'マイ',
+      album: 'アルバム',
+      deviceBind: 'デバイス登録',
+      deviceList: 'マイデバイス',
+      profile: 'プロフィール',
+      company: '企業登録',
+      screen: '画面配信',
+      guide: 'ガイド',
+      settings: '設定',
+      permissions: '権限管理',
+    },
+    pages: {
+      login: {
+        kicker: 'メールアクセス',
+        title: 'ClearMirror にログイン',
+        subtitle: 'iOS、Android、HarmonyOS のデバイス、アルバム、画面配信業務を支えるログインレイヤーです。',
+        formEyebrow: 'ワークスペースログイン',
+        formTitle: 'メールアドレスとパスワードでログイン',
+        formDescription: '現在はデモモードです。有効なメールアドレスと 6 文字以上のパスワードを入力してください。',
+        emailLabel: 'メール',
+        emailPlaceholder: 'name@company.com',
+        passwordLabel: 'パスワード',
+        passwordPlaceholder: '6 文字以上',
+        showPassword: '表示',
+        hidePassword: '非表示',
+        signIn: 'ログイン',
+        signingIn: 'ログイン中...',
+        useDemo: 'デモ入力',
+        forgotPassword: 'パスワードを忘れた',
+        noteTitle: 'クロスプラットフォーム対応',
+        noteCopy: 'uni-app x のネイティブコンポーネントと UTS 状態管理で構成されており、同じページ構造を iOS、Android、HarmonyOS で利用できます。',
+        emailRequired: 'メールアドレスを入力してください',
+        emailInvalid: '有効なメールアドレスを入力してください',
+        passwordRequired: 'パスワードを入力してください',
+        passwordTooShort: 'パスワードは 6 文字以上必要です',
+        resetHint: 'ここにパスワード再設定 API を接続します',
+        loginSuccess: 'ログイン成功',
+        loginFailure: '現在ログインできません。しばらくしてから再試行してください',
+      },
+      home: {
+        kicker: 'デバイス運用',
+        sections: {
+          quick: {
+            eyebrow: 'ワークスペース',
+            title: 'よく使う入口',
+            subtitle: '収集、権限、デバイス、画面配信をまとめた入口です',
+          },
+          workflow: {
+            eyebrow: 'フロー',
+            title: '主要フロー',
+            subtitle: '実 API の差し替え位置は確保済みで、後からそのまま接続できます',
+          },
+          snapshot: {
+            eyebrow: 'デバイス状況',
+            title: '運用スナップショット',
+            subtitle: 'デバイス状態、接続方法、最終更新時刻を確認できます',
+            tag: '{count} 台',
+          },
+          notice: {
+            eyebrow: '補足',
+            title: '今回の重点',
+            subtitle: '今回の実装は構造の明快さと拡張のしやすさを優先しています',
+          },
+        },
+        loadError: 'ホームデータの読み込みに失敗しました',
+      },
+      mine: {
+        kicker: 'アカウントセンター',
+        loadError: 'アカウントセンターの読み込みに失敗しました',
+      },
+      album: {
+        kicker: 'アルバムセンター',
+        title: 'マイアルバム',
+        summaryTotal: '総件数',
+        summaryPending: '未同期',
+        summarySynced: '同期済み',
+        records: {
+          eyebrow: '記録',
+          title: '最近のアップロード',
+          subtitle: '検索、絞り込み、一括操作、レビュー状態の追加にも対応しやすい構成です',
+        },
+        storage: {
+          eyebrow: '保存方針',
+          title: 'キャッシュと拡張',
+          subtitle: '圧縮、アップロード、アーカイブ方針は service と upload モジュールに集約する想定です',
+        },
+        loadError: 'アルバムデータの読み込みに失敗しました',
+      },
+      deviceBind: {
+        kicker: 'デバイス登録',
+        title: 'デバイス登録',
+        steps: {
+          eyebrow: '手順',
+          title: '標準ステップ',
+          subtitle: 'まず導入フローを固め、その後 QR と Bluetooth を接続します',
+        },
+        methods: {
+          eyebrow: '入口',
+          title: '登録方法',
+          subtitle: 'ページは表示に専念し、プラットフォーム機能は独立モジュールに残します',
+        },
+        suggestionTitle: '実装メモ',
+        loadError: '登録情報の読み込みに失敗しました',
+      },
+      deviceList: {
+        kicker: 'デバイス一覧',
+        title: 'マイデバイス',
+        list: {
+          eyebrow: '一覧',
+          title: 'デバイスリスト',
+          subtitle: '今後は service 層にページング、絞り込み、キーワード検索を追加できます',
+        },
+        loadError: 'デバイス一覧の読み込みに失敗しました',
+      },
+      profile: {
+        kicker: 'プロフィール',
+        fields: {
+          eyebrow: '情報',
+          title: '項目詳細',
+          subtitle: '将来的にはフォーム編集、アバター更新、権限申請へ拡張できます',
+        },
+        edit: 'プロフィール編集',
+        submit: '更新を送信',
+        editHint: '編集入口を予約済みです',
+        submitHint: '送信 API を予約済みです',
+        loadError: 'プロフィールの読み込みに失敗しました',
+      },
+      company: {
+        kicker: '企業情報',
+        completionRate: '完成度 {rate}%',
+        fields: {
+          eyebrow: '基本情報',
+          title: '企業登録情報',
+          subtitle: '項目状態と審査状態を分離し、後続の承認フローに備えています',
+        },
+        checklist: {
+          eyebrow: 'コンプライアンス',
+          title: '公開前の確認',
+          subtitle: '変化しやすい確認項目はページに直書きせず設定化します',
+        },
+        loadError: '企業情報の読み込みに失敗しました',
+      },
+      screen: {
+        kicker: '画面配信',
+        title: '画面配信',
+        rooms: {
+          eyebrow: 'ルーム',
+          title: '配信ルーム',
+          subtitle: '今後はオンライン状態、素材編成、スケジュール機能にも接続できます',
+        },
+        tips: {
+          eyebrow: '保守',
+          title: '実装メモ',
+          subtitle: '再生方針と画面ログは独立したサービスへ分離する想定です',
+        },
+        loadError: '画面配信データの読み込みに失敗しました',
+      },
+      guide: {
+        kicker: 'ガイド',
+        title: '操作ガイド',
+        supportTitle: 'サポート連絡先',
+        loadError: 'ガイドの読み込みに失敗しました',
+      },
+      permissions: {
+        kicker: '権限管理',
+        title: '権限センター',
+        platform: {
+          eyebrow: '認可状態',
+          title: 'プラットフォーム機能',
+          subtitle: '権限確認を一か所に集約し、各ページへ判定処理が散らばらないようにします',
+        },
+        suggestionTitle: '実装案',
+        loadError: '権限データの読み込みに失敗しました',
+      },
+      settings: {
+        kicker: '設定',
+        title: '設定',
+        heroSubtitle: 'バージョン {version} ・ 最終同期 {lastSync}',
+        language: {
+          title: '言語',
+          subtitle: 'アプリの表示言語を選択します。選択結果は自動的に保存されます。',
+          current: '現在',
+          changed: '{language} に切り替えました',
+        },
+        suggestionTitle: '実装提案',
+        suggestionSubtitle: '設定項目はバックエンドの設定センターで管理し、ローカルキャッシュをフォールバックにすると、各プラットフォームでの手動差分を防げます。',
+        loadError: '設定の読み込みに失敗しました',
+      },
+    },
+  },
+}
+
+const i18n = createI18n({
+  locale: resolveInitialLocale(),
+  fallbackLocale: DEFAULT_LOCALE,
+  messages,
+  tabBars: {
+    'zh-CN': ['首页', '我的'],
+    'en-US': ['Home', 'Mine'],
+    'ja-JP': ['ホーム', 'マイ'],
+  },
+})
+
+export default i18n
+
+export function t(key : string, values : any | null = null, locale : string | null = null) : string {
+  return i18n.global.t(key, values, locale)
+}
+
+export function getLocale() : AppLocale {
+  return normalizeLocale(i18n.global.locale.value)
+}
+
+export function setLocale(locale : string) : AppLocale {
+  const nextLocale = normalizeLocale(locale)
+  i18n.global.locale.value = nextLocale
+  return nextLocale
+}
+
+export function isLocale(locale : string) : boolean {
+  return getLocale() == normalizeLocale(locale)
+}
+
+export function getLanguageLabel(locale : string) : string {
+  const currentLocale = normalizeLocale(locale)
+  if (currentLocale == 'en-US') {
+    return 'English'
+  }
+
+  if (currentLocale == 'ja-JP') {
+    return '日本語'
+  }
+
+  return '简体中文'
+}
+
+export function applyPageTitle(key : string) : void {
+  uni.setNavigationBarTitle({
+    title: t(key),
+  })
+}

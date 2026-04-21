@@ -1,132 +1,123 @@
 import { ROUTES } from '@/src/constants/routes.uts'
-import { HomeDashboard } from '@/src/types/models.uts'
+import { getLocale } from '@/src/i18n/index.uts'
+import { getMockState } from '@/src/mock/state.uts'
+import { DeviceCard, HomeDashboard } from '@/src/types/models.uts'
 
-export function getHomeDashboardMock(): HomeDashboard {
+function toDeviceCards(count : number = 3) : Array<DeviceCard> {
+  const state = getMockState()
+  const devices = [] as Array<DeviceCard>
+  const maxCount = Math.min(count, state.devices.length)
+  for (let i = 0; i < maxCount; i++) {
+    const item = state.devices[i]
+    devices.push({
+      id: item.id,
+      name: item.name,
+      location: item.location,
+      status: item.status,
+      statusTone: item.statusTone,
+      connection: item.connection,
+      battery: item.battery,
+      updatedAt: item.updatedAt,
+    })
+  }
+  return devices
+}
+
+export function getHomeDashboardMock() : HomeDashboard {
+  const state = getMockState()
+  const locale = getLocale()
+  const onlineCount = state.devices.filter((item) => item.statusTone == 'success' || item.statusTone == 'primary').length
+  const pendingAlbumCount = state.albums.filter((item) => item.statusTone == 'warning').length
+  const permissionIssueCount = state.devices.filter((item) => item.statusTone == 'warning').length
+
+  if (locale == 'en-US') {
+    return {
+      greeting: 'Home execution flow is ready',
+      subtitle: 'Capture, album selection, device switching and cast confirmation are now wired as mock operational steps on top of the dashboard.',
+      metrics: [
+        { label: 'Online Devices', value: onlineCount.toString(), delta: 'Live', note: 'Includes devices with active or primary connection', tone: 'primary' },
+        { label: 'Pending Albums', value: pendingAlbumCount.toString(), delta: 'Need cast', note: 'Recent records waiting for cast or review', tone: 'warning' },
+        { label: 'Cast Records', value: state.castRecords.length.toString(), delta: 'History', note: 'Can be retried or deleted in screen control', tone: 'success' },
+        { label: 'Access Issues', value: permissionIssueCount.toString(), delta: 'Check now', note: 'Pending access should be resolved before casting', tone: 'neutral' },
+      ],
+      quickEntries: [
+        { title: 'My Album', subtitle: 'Delete your own photos or cast one selected image', badge: state.albums.length.toString() + ' items', route: ROUTES.ALBUM, tone: 'primary' },
+        { title: 'Bind Device', subtitle: 'Use QR, Bluetooth or manual SN entry', badge: '3 methods', route: ROUTES.DEVICE_BIND, tone: 'success' },
+        { title: 'My Devices', subtitle: 'Rename, connect, clear memory and switch roles', badge: state.devices.length.toString() + ' devices', route: ROUTES.DEVICE_LIST, tone: 'neutral' },
+        { title: 'Permissions', subtitle: 'Check camera, album, location and Bluetooth access', badge: permissionIssueCount.toString() + ' pending', route: ROUTES.PERMISSIONS, tone: 'warning' },
+      ],
+      workflow: [
+        { title: 'Capture Or Pick Image', description: 'Choose between mock camera capture and album selection before entering the cast flow.', statusText: 'Ready', statusTone: 'success' },
+        { title: 'Select Device', description: 'Switch the connected device before pushing images to the frame.', statusText: 'Interactive', statusTone: 'primary' },
+        { title: 'Preview And Confirm', description: 'Preview record metadata and confirm the cast target before submission.', statusText: 'Required', statusTone: 'warning' },
+        { title: 'Record Management', description: 'Successful and failed cast records are collected in screen control for retry or cleanup.', statusText: 'Stable', statusTone: 'success' },
+      ],
+      devices: toDeviceCards(3),
+      notices: [
+        'The home page now carries an executable mock cast flow instead of acting as a pure dashboard.',
+        'Album, device and cast actions share the same in-memory state, so cross-page updates stay consistent.',
+        'Real device APIs can later replace the current mock actions without changing the page structure.',
+      ],
+    }
+  }
+
+  if (locale == 'ja-JP') {
+    return {
+      greeting: 'ホーム実行フローの準備が整いました',
+      subtitle: '撮影、アルバム選択、端末切替、投屏確認を、ダッシュボード上の mock 実行ステップとして接続しました。',
+      metrics: [
+        { label: '在线设备', value: onlineCount.toString(), delta: '实时', note: '成功 / 主连接状态の端末を含みます', tone: 'primary' },
+        { label: '待投屏相册', value: pendingAlbumCount.toString(), delta: '要処理', note: '投屏または審査待ちの最近記録', tone: 'warning' },
+        { label: '投屏记录', value: state.castRecords.length.toString(), delta: '履歴', note: '投屏管理で再試行 / 削除できます', tone: 'success' },
+        { label: '权限异常', value: permissionIssueCount.toString(), delta: '確認', note: '投屏前に解消が必要です', tone: 'neutral' },
+      ],
+      quickEntries: [
+        { title: 'マイアルバム', subtitle: '自分の写真削除や単枚投屏を行えます。', badge: state.albums.length.toString() + ' 件', route: ROUTES.ALBUM, tone: 'primary' },
+        { title: 'デバイス登録', subtitle: 'QR、Bluetooth、SN 手動入力に対応します。', badge: '3 方式', route: ROUTES.DEVICE_BIND, tone: 'success' },
+        { title: 'マイデバイス', subtitle: '名称編集、接続切替、一键清空、権限変更に対応します。', badge: state.devices.length.toString() + ' 台', route: ROUTES.DEVICE_LIST, tone: 'neutral' },
+        { title: '権限センター', subtitle: '相机、相册、定位、Bluetooth を確認します。', badge: permissionIssueCount.toString() + ' 件', route: ROUTES.PERMISSIONS, tone: 'warning' },
+      ],
+      workflow: [
+        { title: '图片取得', description: 'mock 拍照または相册選択から投屏フローを開始します。', statusText: '準備完了', statusTone: 'success' },
+        { title: '设备选择', description: '当前连接端末を切り替えて投屏先を決めます。', statusText: '操作中', statusTone: 'primary' },
+        { title: '预览确认', description: '图片情報を確認して投屏先を確定します。', statusText: '必須', statusTone: 'warning' },
+        { title: '记录管理', description: '成功 / 失败投屏は投屏管理へ集約されます。', statusText: '安定', statusTone: 'success' },
+      ],
+      devices: toDeviceCards(3),
+      notices: [
+        'ホームは純粋な看板ページではなく、実行型 mock フローを持つ入口に変わりました。',
+        'アルバム、端末、投屏操作は同じ内存状態を共有し、ページ間更新が揃います。',
+        '今後は実デバイス API へ差し替えてもページ構造は維持できます。',
+      ],
+    }
+  }
+
   return {
-    greeting: '今日中台运行稳定',
-    subtitle: '围绕采集、相册、设备绑定与投屏的主流程已完成骨架搭建，当前页面全部使用模拟数据驱动。',
+    greeting: '首页执行流已就绪',
+    subtitle: '拍照、相册选择、设备切换和投屏确认已从单纯展示升级为可执行的 mock 业务流程。',
     metrics: [
-      {
-        label: '在线设备',
-        value: '24',
-        delta: '+3',
-        note: '较昨日新增 3 台',
-        tone: 'primary',
-      },
-      {
-        label: '待同步相册',
-        value: '06',
-        delta: '-2',
-        note: '待后台归档',
-        tone: 'warning',
-      },
-      {
-        label: '投屏房间',
-        value: '08',
-        delta: '100%',
-        note: '已全部接入统一管理',
-        tone: 'success',
-      },
-      {
-        label: '权限异常',
-        value: '02',
-        delta: '需处理',
-        note: '定位与通知待确认',
-        tone: 'neutral',
-      },
+      { label: '在线设备', value: onlineCount.toString(), delta: '实时', note: '包含连接正常和主连接状态设备', tone: 'primary' },
+      { label: '待投屏相册', value: pendingAlbumCount.toString(), delta: '待处理', note: '最近上传且待投屏 / 待审核记录', tone: 'warning' },
+      { label: '投屏记录', value: state.castRecords.length.toString(), delta: '历史', note: '可在投屏管理中重试或删除', tone: 'success' },
+      { label: '权限异常', value: permissionIssueCount.toString(), delta: '需确认', note: '投屏前建议先处理待授权设备', tone: 'neutral' },
     ],
     quickEntries: [
-      {
-        title: '我的相册',
-        subtitle: '浏览上传记录与同步状态',
-        badge: '128 张',
-        route: ROUTES.ALBUM,
-        tone: 'primary',
-      },
-      {
-        title: '绑定设备',
-        subtitle: '扫码、蓝牙或手动录入绑定',
-        badge: '3 种方式',
-        route: ROUTES.DEVICE_BIND,
-        tone: 'success',
-      },
-      {
-        title: '我的设备',
-        subtitle: '查看连接状态与位置分布',
-        badge: '24 台',
-        route: ROUTES.DEVICE_LIST,
-        tone: 'neutral',
-      },
-      {
-        title: '权限中心',
-        subtitle: '检查相机、相册、定位等授权',
-        badge: '2 项待确认',
-        route: ROUTES.PERMISSIONS,
-        tone: 'warning',
-      },
+      { title: '我的相册', subtitle: '支持批量删除自己上传的照片和单张投屏', badge: state.albums.length.toString() + ' 张', route: ROUTES.ALBUM, tone: 'primary' },
+      { title: '绑定设备', subtitle: '支持扫码、蓝牙和 SN 手动录入', badge: '3 种方式', route: ROUTES.DEVICE_BIND, tone: 'success' },
+      { title: '我的设备', subtitle: '支持重命名、连接切换、一键清空和权限调整', badge: state.devices.length.toString() + ' 台', route: ROUTES.DEVICE_LIST, tone: 'neutral' },
+      { title: '权限中心', subtitle: '集中检查相机、相册、定位和蓝牙权限', badge: permissionIssueCount.toString() + ' 项', route: ROUTES.PERMISSIONS, tone: 'warning' },
     ],
     workflow: [
-      {
-        title: '企业身份校验',
-        description: '统一完成企业注册、账号认证和角色归属。',
-        statusText: '已就绪',
-        statusTone: 'success',
-      },
-      {
-        title: '设备接入',
-        description: '通过扫码、蓝牙发现或 SN 号完成设备绑定。',
-        statusText: '进行中',
-        statusTone: 'primary',
-      },
-      {
-        title: '素材采集',
-        description: '移动端拍摄或从相册选择后写入业务归档流。',
-        statusText: '待同步',
-        statusTone: 'warning',
-      },
-      {
-        title: '投屏展示',
-        description: '统一分配投屏房间、屏幕模式和播放场景。',
-        statusText: '稳定',
-        statusTone: 'success',
-      },
+      { title: '拍照 / 选图', description: '从 mock 拍照或相册选择开始，生成新的待投屏记录。', statusText: '已就绪', statusTone: 'success' },
+      { title: '设备选择', description: '可切换当前连接设备，确定本次投屏目标。', statusText: '进行中', statusTone: 'primary' },
+      { title: '预览确认', description: '确认图片信息、设备名称和相框存储状态后再提交。', statusText: '必选', statusTone: 'warning' },
+      { title: '记录归档', description: '投屏成功或失败后，统一进入投屏管理页维护。', statusText: '稳定', statusTone: 'success' },
     ],
-    devices: [
-      {
-        id: 'device-a01',
-        name: '大厅演示屏 A01',
-        location: '总部 1F 接待区',
-        status: '在线',
-        statusTone: 'success',
-        connection: 'Wi-Fi 6 / 4K 投屏',
-        battery: '外接电源',
-        updatedAt: '2 分钟前',
-      },
-      {
-        id: 'device-b03',
-        name: '会议平板 B03',
-        location: '总部 6F 多功能厅',
-        status: '低频使用',
-        statusTone: 'neutral',
-        connection: '有线局域网 / 1080P',
-        battery: '外接电源',
-        updatedAt: '18 分钟前',
-      },
-      {
-        id: 'device-c08',
-        name: '移动采集终端 C08',
-        location: '华东巡检组',
-        status: '待授权',
-        statusTone: 'warning',
-        connection: '5G / 蓝牙',
-        battery: '73%',
-        updatedAt: '6 分钟前',
-      },
-    ],
+    devices: toDeviceCards(3),
     notices: [
-      '当前模板默认启用 Mock 模式，接入真实接口时仅需替换 service 层实现。',
-      'Android、iOS、HarmonyOS 共用同一套路由、页面与请求层设计。',
-      '页面结构已按业务域拆分，便于后续增加审批、消息或组织模块。',
+      '首页不再只是仪表盘，而是承载拍照、选图、设备选择和确认投屏的执行入口。',
+      '相册、设备、投屏操作共享同一份内存状态，跨页面更新保持一致。',
+      '后续替换真实设备 API 时，可直接复用当前页面结构与服务接口。',
     ],
   }
 }

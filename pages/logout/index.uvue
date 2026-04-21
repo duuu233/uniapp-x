@@ -1,0 +1,101 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">SESSION</text>
+        <text class="page-title">退出登录</text>
+        <text class="page-subtitle">退出后将返回登录页，当前 mock 会话会被关闭，但业务配置和演示数据仍会保留。</text>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">当前账号</text>
+        <text class="surface-subtitle">{{ pageState.email }}</text>
+        <view class="tip-row">
+          <view class="tip-dot"></view>
+          <text class="tip-text">退出登录后需要重新通过密码或验证码完成登录。</text>
+        </view>
+        <view class="tip-row">
+          <view class="tip-dot"></view>
+          <text class="tip-text">当前 mock 状态下，设备、相册和投屏记录仍会保留，便于重新进入后继续演示。</text>
+        </view>
+        <view class="primary-button action-button" @tap="submitLogout">
+          <text class="primary-button-text">{{ pageState.loading ? '退出中...' : '确认退出登录' }}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import { ROUTES } from '@/src/constants/routes.uts'
+import { fetchCurrentUserEmail, logoutCurrentUser } from '@/src/services/auth.uts'
+import { relaunchRoute } from '@/src/utils/navigation.uts'
+
+const pageState = reactive({
+  loading: false,
+  email: '',
+} as LogoutPageState)
+
+type LogoutPageState = {
+  loading: boolean
+  email: string
+}
+
+function setTitle(): void {
+  uni.setNavigationBarTitle({
+    title: '退出登录',
+  })
+}
+
+async function submitLogout(): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+
+  pageState.loading = true
+  await logoutCurrentUser()
+  uni.showToast({
+    title: '已退出登录',
+    icon: 'success',
+  })
+  setTimeout(() => {
+    relaunchRoute(ROUTES.LOGIN)
+  }, 220)
+}
+
+onShow(() => {
+  setTitle()
+  pageState.email = fetchCurrentUserEmail()
+})
+</script>
+
+<style lang="scss">
+.tip-row {
+  flex-direction: row;
+  align-items: flex-start;
+  padding-top: 10rpx;
+  padding-bottom: 10rpx;
+}
+
+.tip-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 12rpx;
+  margin-right: 14rpx;
+  border-radius: 6rpx;
+  background-color: $app-primary;
+}
+
+.tip-text {
+  flex: 1;
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+
+.action-button {
+  margin-top: 28rpx;
+  align-items: center;
+  justify-content: center;
+}
+</style>

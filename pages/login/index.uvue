@@ -5,39 +5,44 @@
       <view class="login-aura login-aura--right"></view>
 
       <view class="login-hero">
-        <text class="login-kicker">EMAIL ACCESS</text>
-        <text class="login-title">Sign In To ClearMirror</text>
-        <text class="login-subtitle">
-          A quiet login layer for device, album and screen workflows across iOS, Android and HarmonyOS.
-        </text>
+        <text class="login-kicker">{{ $t('pages.login.kicker') }}</text>
+        <text class="login-title">{{ $t('pages.login.title') }}</text>
+        <text class="login-subtitle">{{ $t('pages.login.subtitle') }}</text>
       </view>
 
       <view class="surface-card auth-card">
-        <text class="auth-eyebrow">Workspace Login</text>
-        <text class="auth-heading">Use email and password</text>
-        <text class="auth-description">
-          Demo mode is enabled. Enter any valid email and a password with at least 6 characters.
-        </text>
+        <text class="auth-eyebrow">{{ $t('pages.login.formEyebrow') }}</text>
+        <text class="auth-heading">{{ $t('pages.login.formTitle') }}</text>
+        <text class="auth-description">{{ $t('pages.login.formDescription') }}</text>
+
+        <view class="mode-row">
+          <view :class="pageState.loginMode == 'password' ? 'tone-pill tone-pill--primary auth-mode-pill' : 'tone-pill tone-pill--neutral auth-mode-pill'" @tap="switchLoginMode('password')">
+            <text :class="pageState.loginMode == 'password' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">密码登录</text>
+          </view>
+          <view :class="pageState.loginMode == 'code' ? 'tone-pill tone-pill--primary auth-mode-pill' : 'tone-pill tone-pill--neutral auth-mode-pill'" @tap="switchLoginMode('code')">
+            <text :class="pageState.loginMode == 'code' ? 'tone-pill-text tone-pill-text--primary' : 'tone-pill-text tone-pill-text--neutral'">验证码登录</text>
+          </view>
+        </view>
 
         <view class="auth-field">
-          <text class="auth-label">Email</text>
+          <text class="auth-label">{{ $t('pages.login.emailLabel') }}</text>
           <view :class="pageState.emailError ? 'auth-input-shell auth-input-shell--error' : 'auth-input-shell'">
             <input
               class="auth-input"
               v-model="pageState.email"
               type="text"
-              placeholder="name@company.com"
+              :placeholder="$t('pages.login.emailPlaceholder')"
               placeholder-style="color:#8A938B;font-size:14px;"
               :disabled="pageState.loading"
             />
           </view>
         </view>
 
-        <view class="auth-field">
+        <view v-if="pageState.loginMode == 'password'" class="auth-field">
           <view class="auth-inline-head">
-            <text class="auth-label">Password</text>
+            <text class="auth-label">{{ $t('pages.login.passwordLabel') }}</text>
             <view class="field-toggle" @tap="togglePasswordMask">
-              <text class="field-toggle-text">{{ pageState.maskPassword ? 'Show' : 'Hide' }}</text>
+              <text class="field-toggle-text">{{ pageState.maskPassword ? $t('pages.login.showPassword') : $t('pages.login.hidePassword') }}</text>
             </view>
           </view>
           <view :class="pageState.passwordError ? 'auth-input-shell auth-input-shell--error' : 'auth-input-shell'">
@@ -46,9 +51,28 @@
               v-model="pageState.password"
               type="text"
               :password="pageState.maskPassword"
-              placeholder="At least 6 characters"
+              :placeholder="$t('pages.login.passwordPlaceholder')"
               placeholder-style="color:#8A938B;font-size:14px;"
               :disabled="pageState.loading"
+            />
+          </view>
+        </view>
+
+        <view v-if="pageState.loginMode == 'code'" class="auth-field">
+          <view class="auth-inline-head">
+            <text class="auth-label">验证码</text>
+            <view class="field-toggle" @tap="sendLoginCode">
+              <text class="field-toggle-text">{{ pageState.sendingCode ? '发送中...' : '发送验证码' }}</text>
+            </view>
+          </view>
+          <view class="auth-input-shell">
+            <input
+              class="auth-input"
+              v-model="pageState.code"
+              type="text"
+              placeholder="请输入 6 位验证码"
+              placeholder-style="color:#8A938B;font-size:14px;"
+              :disabled="pageState.loading || pageState.sendingCode"
             />
           </view>
         </view>
@@ -58,25 +82,34 @@
         </view>
 
         <view :class="pageState.loading ? 'primary-button auth-submit auth-submit--disabled' : 'primary-button auth-submit'" @tap="submitLogin">
-          <text class="primary-button-text">{{ pageState.loading ? 'Signing In...' : 'Sign In' }}</text>
+          <text class="primary-button-text">{{ pageState.loading ? $t('pages.login.signingIn') : $t('pages.login.signIn') }}</text>
         </view>
 
         <view class="auth-actions">
           <view class="ghost-button auth-action" @tap="fillDemoCredentials">
-            <text class="ghost-button-text">Use Demo</text>
+            <text class="ghost-button-text">{{ $t('pages.login.useDemo') }}</text>
+          </view>
+          <view class="ghost-button auth-action" @tap="goRegister">
+            <text class="ghost-button-text">注册账号</text>
           </view>
           <view class="ghost-button auth-action" @tap="showResetHint">
-            <text class="ghost-button-text">Forgot Password</text>
+            <text class="ghost-button-text">{{ $t('pages.login.forgotPassword') }}</text>
           </view>
         </view>
       </view>
 
+      <view class="surface-card wechat-card">
+        <text class="auth-eyebrow">MINI PROGRAM</text>
+        <text class="auth-heading">微信授权登录</text>
+        <text class="auth-description">补齐需求表中的小程序微信授权登录与手机号绑定链路，这里提供 mock 入口。</text>
+        <view class="primary-button auth-submit" @tap="loginByWechat">
+          <text class="primary-button-text">微信授权并绑定手机号</text>
+        </view>
+      </view>
+
       <view class="surface-card login-note">
-        <text class="login-note-title">Cross-Platform Ready</text>
-        <text class="login-note-copy">
-          Built with uni-app x native components and UTS form state, so the same page structure works on iOS,
-          Android and HarmonyOS.
-        </text>
+        <text class="login-note-title">{{ $t('pages.login.noteTitle') }}</text>
+        <text class="login-note-copy">{{ $t('pages.login.noteCopy') }}</text>
       </view>
     </view>
   </scroll-view>
@@ -84,39 +117,46 @@
 
 <script setup lang="uts">
 import { ROUTES } from '@/src/constants/routes.uts'
-import { loginWithEmail } from '@/src/services/auth.uts'
+import { applyPageTitle, t } from '@/src/i18n/index.uts'
+import { loginWithEmail, loginWithEmailCode, loginWithWechat, requestLoginCode } from '@/src/services/auth.uts'
 import { openRoute } from '@/src/utils/navigation.uts'
 
 const pageState = reactive({
+  loginMode: 'password',
   email: '',
   password: '',
+  code: '',
   errorMessage: '',
   emailError: false,
   passwordError: false,
   loading: false,
+  sendingCode: false,
   maskPassword: true,
 } as LoginPageState)
 
 type LoginPageState = {
+  loginMode: string
   email: string
   password: string
+  code: string
   errorMessage: string
   emailError: boolean
   passwordError: boolean
   loading: boolean
+  sendingCode: boolean
   maskPassword: boolean
 }
 
 function validateEmail(email: string): string {
   const value = email.trim()
   if (value.length == 0) {
-    return 'Email is required'
+    return t('pages.login.emailRequired')
   }
 
   const atIndex = value.indexOf('@')
   const dotIndex = value.lastIndexOf('.')
   if (atIndex <= 0 || dotIndex <= atIndex + 1 || dotIndex >= value.length - 1) {
-    return 'Enter a valid email address'
+    return t('pages.login.emailInvalid')
   }
 
   return ''
@@ -124,17 +164,24 @@ function validateEmail(email: string): string {
 
 function validatePassword(password: string): string {
   if (password.length == 0) {
-    return 'Password is required'
+    return t('pages.login.passwordRequired')
   }
   if (password.length < 6) {
-    return 'Password must be at least 6 characters'
+    return t('pages.login.passwordTooShort')
+  }
+  return ''
+}
+
+function validateCode(code: string): string {
+  if (code.trim().length != 6) {
+    return '请输入 6 位验证码'
   }
   return ''
 }
 
 function runValidation(): boolean {
   const emailErrorMessage = validateEmail(pageState.email)
-  const passwordErrorMessage = validatePassword(pageState.password)
+  const passwordErrorMessage = pageState.loginMode == 'password' ? validatePassword(pageState.password) : validateCode(pageState.code)
 
   pageState.emailError = emailErrorMessage.length > 0
   pageState.passwordError = passwordErrorMessage.length > 0
@@ -156,20 +203,89 @@ function togglePasswordMask(): void {
   pageState.maskPassword = !pageState.maskPassword
 }
 
+function switchLoginMode(mode: string): void {
+  if (pageState.loading || pageState.sendingCode) {
+    return
+  }
+  pageState.loginMode = mode
+  pageState.errorMessage = ''
+  pageState.passwordError = false
+}
+
 function fillDemoCredentials(): void {
   if (pageState.loading) {
     return
   }
   pageState.email = 'operator@clearmirror.example'
   pageState.password = 'clear123'
+  pageState.code = '246810'
   pageState.emailError = false
   pageState.passwordError = false
   pageState.errorMessage = ''
 }
 
+async function sendLoginCode(): Promise<void> {
+  if (pageState.loading || pageState.sendingCode) {
+    return
+  }
+
+  const emailMessage = validateEmail(pageState.email)
+  if (emailMessage.length > 0) {
+    pageState.errorMessage = emailMessage
+    uni.showToast({
+      title: emailMessage,
+      icon: 'none',
+    })
+    return
+  }
+
+  pageState.sendingCode = true
+  try {
+    const code = await requestLoginCode(pageState.email)
+    uni.showToast({
+      title: '演示验证码：' + code,
+      icon: 'none',
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.sendingCode = false
+}
+
+function goRegister(): void {
+  openRoute(ROUTES.REGISTER)
+}
+
+async function loginByWechat(): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+
+  pageState.loading = true
+  try {
+    await loginWithWechat('13800008201')
+    uni.showToast({
+      title: '已完成微信授权登录',
+      icon: 'success',
+    })
+    setTimeout(() => {
+      openRoute(ROUTES.HOME)
+    }, 220)
+  } catch (error) {
+    uni.showToast({
+      title: error as string,
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
 function showResetHint(): void {
   uni.showToast({
-    title: 'Connect your reset API here',
+    title: t('pages.login.resetHint'),
     icon: 'none',
   })
 }
@@ -192,16 +308,20 @@ async function submitLogin(): Promise<void> {
   pageState.email = pageState.email.trim()
 
   try {
-    await loginWithEmail(pageState.email, pageState.password)
+    if (pageState.loginMode == 'password') {
+      await loginWithEmail(pageState.email, pageState.password)
+    } else {
+      await loginWithEmailCode(pageState.email, pageState.code)
+    }
     uni.showToast({
-      title: 'Login success',
+      title: t('pages.login.loginSuccess'),
       icon: 'success',
     })
     setTimeout(() => {
       openRoute(ROUTES.HOME)
     }, 220)
   } catch (error) {
-    pageState.errorMessage = 'Unable to sign in right now'
+    pageState.errorMessage = t('pages.login.loginFailure')
     uni.showToast({
       title: pageState.errorMessage,
       icon: 'none',
@@ -210,6 +330,10 @@ async function submitLogin(): Promise<void> {
 
   pageState.loading = false
 }
+
+onShow(() => {
+  applyPageTitle('nav.login')
+})
 </script>
 
 <style lang="scss">
@@ -293,6 +417,16 @@ async function submitLogin(): Promise<void> {
   color: $app-muted;
 }
 
+.mode-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.auth-mode-pill {
+  margin-right: 12rpx;
+}
+
 .auth-field {
   margin-top: 24rpx;
 }
@@ -370,16 +504,22 @@ async function submitLogin(): Promise<void> {
 .auth-actions {
   flex-direction: row;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin-top: 16rpx;
 }
 
 .auth-action {
-  width: 48%;
+  width: 31%;
   align-items: center;
   justify-content: center;
 }
 
 .login-note {
+  padding-top: 24rpx;
+  background-color: rgba(247, 242, 234, 0.9);
+}
+
+.wechat-card {
   padding-top: 24rpx;
   background-color: rgba(247, 242, 234, 0.9);
 }
