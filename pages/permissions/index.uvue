@@ -1,0 +1,106 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">PERMISSIONS</text>
+        <text class="page-title">权限中心</text>
+        <text class="page-subtitle">{{ pageState.permission.summary }}</text>
+      </view>
+
+      <AppSection eyebrow="授权状态" title="平台能力" subtitle="把权限检测收敛为统一入口，避免各页面散落平台判断">
+        <view v-for="item in pageState.permission.permissions" :key="item.title" class="permission-card">
+          <view class="row-between">
+            <text class="permission-title">{{ item.title }}</text>
+            <view :class="'tone-pill tone-pill--' + item.statusTone">
+              <text :class="'tone-pill-text tone-pill-text--' + item.statusTone">{{ item.status }}</text>
+            </view>
+          </view>
+          <text class="permission-desc">{{ item.description }}</text>
+          <view class="ghost-button permission-button" @tap="showHint(item.actionLabel)">
+            <text class="ghost-button-text">{{ item.actionLabel }}</text>
+          </view>
+        </view>
+      </AppSection>
+
+      <view class="surface-card">
+        <text class="surface-title">封装建议</text>
+        <text class="surface-subtitle">{{ pageState.permission.note }}</text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchPermissionPageData } from '@/src/services/system.uts'
+import { PermissionPageData, createEmptyPermissionPageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  permission: createEmptyPermissionPageData() as PermissionPageData,
+} as PermissionPageState)
+
+type PermissionPageState = {
+  loading: boolean
+  permission: PermissionPageData
+}
+
+async function loadPermissionData() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const permissionData = await fetchPermissionPageData()
+    const permissionData = await fetchPermissionPageData()
+    pageState.permission = permissionData
+  } catch (error) {
+    uni.showToast({
+      title: '权限数据加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+function showHint(message: string): void {
+  uni.showToast({
+    title: message,
+    icon: 'none',
+  })
+}
+
+onLoad(() => {
+  loadPermissionData()
+})
+</script>
+
+<style lang="scss">
+.permission-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx 22rpx;
+  border-radius: 24rpx;
+  background-color: $app-surface;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(213, 204, 190, 0.8);
+}
+
+.permission-title {
+  flex: 1;
+  padding-right: 14rpx;
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.permission-desc {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: $app-muted;
+}
+
+.permission-button {
+  align-self: flex-start;
+  margin-top: 16rpx;
+}
+</style>

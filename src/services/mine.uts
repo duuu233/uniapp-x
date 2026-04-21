@@ -1,0 +1,11 @@
+import { getMineDashboardMock } from '@/src/mock/mine.uts'
+import { request } from '@/src/network/http.uts'
+import { MineDashboard } from '@/src/types/models.uts'
+
+export function fetchMineDashboard(): Promise<MineDashboard> {
+  return request<MineDashboard>({
+    path: '/dashboard/mine',
+    method: 'GET',
+    mockData: getMineDashboardMock(),
+  })
+}

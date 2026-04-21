@@ -1,0 +1,89 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">GUIDE</text>
+        <text class="page-title">操作指南</text>
+        <text class="page-subtitle">{{ pageState.guide.summary }}</text>
+      </view>
+
+      <view v-for="section in pageState.guide.sections" :key="section.title" class="surface-card guide-card">
+        <text class="surface-title">{{ section.title }}</text>
+        <text class="surface-subtitle">{{ section.description }}</text>
+        <view v-for="point in section.points" :key="point" class="tip-row">
+          <view class="tip-dot"></view>
+          <text class="tip-text">{{ point }}</text>
+        </view>
+      </view>
+
+      <view class="surface-card">
+        <text class="surface-title">联系支持</text>
+        <text class="surface-subtitle">{{ pageState.guide.contact }}</text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import { fetchGuidePageData } from '@/src/services/system.uts'
+import { GuidePageData, createEmptyGuidePageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  guide: createEmptyGuidePageData() as GuidePageData,
+} as GuidePageState)
+
+type GuidePageState = {
+  loading: boolean
+  guide: GuidePageData
+}
+
+async function loadGuide() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const guideData = await fetchGuidePageData()
+    const guideData = await fetchGuidePageData()
+    pageState.guide = guideData
+  } catch (error) {
+    uni.showToast({
+      title: '指南加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+onLoad(() => {
+  loadGuide()
+})
+</script>
+
+<style lang="scss">
+.guide-card {
+  padding-top: 24rpx;
+}
+
+.tip-row {
+  flex-direction: row;
+  align-items: flex-start;
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
+}
+
+.tip-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 12rpx;
+  margin-right: 14rpx;
+  border-radius: 6rpx;
+  background-color: $app-primary;
+}
+
+.tip-text {
+  flex: 1;
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+</style>

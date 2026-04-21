@@ -1,0 +1,132 @@
+import { ROUTES } from '@/src/constants/routes.uts'
+import { HomeDashboard } from '@/src/types/models.uts'
+
+export function getHomeDashboardMock(): HomeDashboard {
+  return {
+    greeting: '今日中台运行稳定',
+    subtitle: '围绕采集、相册、设备绑定与投屏的主流程已完成骨架搭建，当前页面全部使用模拟数据驱动。',
+    metrics: [
+      {
+        label: '在线设备',
+        value: '24',
+        delta: '+3',
+        note: '较昨日新增 3 台',
+        tone: 'primary',
+      },
+      {
+        label: '待同步相册',
+        value: '06',
+        delta: '-2',
+        note: '待后台归档',
+        tone: 'warning',
+      },
+      {
+        label: '投屏房间',
+        value: '08',
+        delta: '100%',
+        note: '已全部接入统一管理',
+        tone: 'success',
+      },
+      {
+        label: '权限异常',
+        value: '02',
+        delta: '需处理',
+        note: '定位与通知待确认',
+        tone: 'neutral',
+      },
+    ],
+    quickEntries: [
+      {
+        title: '我的相册',
+        subtitle: '浏览上传记录与同步状态',
+        badge: '128 张',
+        route: ROUTES.ALBUM,
+        tone: 'primary',
+      },
+      {
+        title: '绑定设备',
+        subtitle: '扫码、蓝牙或手动录入绑定',
+        badge: '3 种方式',
+        route: ROUTES.DEVICE_BIND,
+        tone: 'success',
+      },
+      {
+        title: '我的设备',
+        subtitle: '查看连接状态与位置分布',
+        badge: '24 台',
+        route: ROUTES.DEVICE_LIST,
+        tone: 'neutral',
+      },
+      {
+        title: '权限中心',
+        subtitle: '检查相机、相册、定位等授权',
+        badge: '2 项待确认',
+        route: ROUTES.PERMISSIONS,
+        tone: 'warning',
+      },
+    ],
+    workflow: [
+      {
+        title: '企业身份校验',
+        description: '统一完成企业注册、账号认证和角色归属。',
+        statusText: '已就绪',
+        statusTone: 'success',
+      },
+      {
+        title: '设备接入',
+        description: '通过扫码、蓝牙发现或 SN 号完成设备绑定。',
+        statusText: '进行中',
+        statusTone: 'primary',
+      },
+      {
+        title: '素材采集',
+        description: '移动端拍摄或从相册选择后写入业务归档流。',
+        statusText: '待同步',
+        statusTone: 'warning',
+      },
+      {
+        title: '投屏展示',
+        description: '统一分配投屏房间、屏幕模式和播放场景。',
+        statusText: '稳定',
+        statusTone: 'success',
+      },
+    ],
+    devices: [
+      {
+        id: 'device-a01',
+        name: '大厅演示屏 A01',
+        location: '总部 1F 接待区',
+        status: '在线',
+        statusTone: 'success',
+        connection: 'Wi-Fi 6 / 4K 投屏',
+        battery: '外接电源',
+        updatedAt: '2 分钟前',
+      },
+      {
+        id: 'device-b03',
+        name: '会议平板 B03',
+        location: '总部 6F 多功能厅',
+        status: '低频使用',
+        statusTone: 'neutral',
+        connection: '有线局域网 / 1080P',
+        battery: '外接电源',
+        updatedAt: '18 分钟前',
+      },
+      {
+        id: 'device-c08',
+        name: '移动采集终端 C08',
+        location: '华东巡检组',
+        status: '待授权',
+        statusTone: 'warning',
+        connection: '5G / 蓝牙',
+        battery: '73%',
+        updatedAt: '6 分钟前',
+      },
+    ],
+    notices: [
+      '当前模板默认启用 Mock 模式，接入真实接口时仅需替换 service 层实现。',
+      'Android、iOS、HarmonyOS 共用同一套路由、页面与请求层设计。',
+      '页面结构已按业务域拆分，便于后续增加审批、消息或组织模块。',
+    ],
+  }
+}

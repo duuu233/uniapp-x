@@ -1,0 +1,75 @@
+<template>
+  <view class="surface-card section-card">
+    <view class="section-head">
+      <view class="section-copy">
+        <text v-if="eyebrow.length > 0" class="section-eyebrow">{{ eyebrow }}</text>
+        <text class="section-title">{{ title }}</text>
+        <text v-if="subtitle.length > 0" class="section-subtitle">{{ subtitle }}</text>
+      </view>
+      <view v-if="tag.length > 0" class="tone-pill tone-pill--neutral">
+        <text class="tone-pill-text tone-pill-text--neutral">{{ tag }}</text>
+      </view>
+    </view>
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+defineProps({
+  eyebrow: {
+    type: String,
+    default: '',
+  },
+  title: {
+    type: String,
+    default: '',
+  },
+  subtitle: {
+    type: String,
+    default: '',
+  },
+  tag: {
+    type: String,
+    default: '',
+  },
+})
+</script>
+
+<style lang="scss">
+.section-card {
+  padding-top: 24rpx;
+}
+
+.section-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.section-copy {
+  flex: 1;
+  padding-right: 18rpx;
+}
+
+.section-eyebrow {
+  font-size: 20rpx;
+  letter-spacing: 3rpx;
+  color: $app-muted;
+}
+
+.section-title {
+  margin-top: 10rpx;
+  font-size: 34rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  color: $app-text;
+}
+
+.section-subtitle {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: $app-muted;
+}
+</style>

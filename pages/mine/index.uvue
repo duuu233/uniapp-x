@@ -1,0 +1,139 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card hero-card--accent">
+        <view class="profile-row">
+          <view class="profile-avatar">
+            <text class="profile-avatar-text">{{ pageState.dashboard.avatarText }}</text>
+          </view>
+          <view class="profile-copy">
+            <text class="page-kicker page-kicker--accent">ACCOUNT CENTER</text>
+            <text class="page-title page-title--accent">{{ pageState.dashboard.userName }}</text>
+            <text class="page-subtitle page-subtitle--accent">{{ pageState.dashboard.role }} · {{ pageState.dashboard.company }}</text>
+          </view>
+        </view>
+        <text class="profile-summary">{{ pageState.dashboard.subtitle }}</text>
+      </view>
+
+      <view class="metric-grid">
+        <view v-for="item in pageState.dashboard.stats" :key="item.label" class="metric-item">
+          <MetricCard :label="item.label" :value="item.value" :delta="item.delta" :note="item.note" :tone="item.tone" />
+        </view>
+      </view>
+
+      <view v-for="group in pageState.dashboard.menuGroups" :key="group.title" class="surface-card group-card">
+        <text class="surface-title">{{ group.title }}</text>
+        <text class="surface-subtitle">{{ group.description }}</text>
+        <view v-for="(item, index) in group.items" :key="item.title" :class="index == group.items.length - 1 ? 'list-cell list-cell--last' : 'list-cell'" @tap="goTo(item.route)">
+          <view class="list-cell-copy">
+            <text class="list-cell-title">{{ item.title }}</text>
+            <text class="list-cell-desc">{{ item.description }}</text>
+          </view>
+          <view class="cell-meta">
+            <view :class="'tone-pill tone-pill--' + item.tone">
+              <text :class="'tone-pill-text tone-pill-text--' + item.tone">{{ item.badge }}</text>
+            </view>
+            <text class="cell-arrow">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import MetricCard from '@/components/MetricCard/MetricCard.uvue'
+import { fetchMineDashboard } from '@/src/services/mine.uts'
+import { MineDashboard, createEmptyMineDashboard } from '@/src/types/models.uts'
+import { openRoute } from '@/src/utils/navigation.uts'
+
+const pageState = reactive({
+  loading: false,
+  dashboard: createEmptyMineDashboard() as MineDashboard,
+} as MinePageState)
+
+type MinePageState = {
+  loading: boolean
+  dashboard: MineDashboard
+}
+
+async function loadMineData() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const mineDashboard = await fetchMineDashboard({ userId: currentUserId.value })
+    const mineDashboard = await fetchMineDashboard()
+    pageState.dashboard = mineDashboard
+  } catch (error) {
+    uni.showToast({
+      title: '个人中心加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+function goTo(route: string): void {
+  openRoute(route)
+}
+
+onLoad(() => {
+  loadMineData()
+})
+</script>
+
+<style lang="scss">
+.profile-row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 110rpx;
+  height: 110rpx;
+  margin-right: 22rpx;
+  border-radius: 55rpx;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.16);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.profile-avatar-text {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.profile-copy {
+  flex: 1;
+}
+
+.profile-summary {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: rgba(247, 242, 234, 0.78);
+}
+
+.metric-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-left: -8rpx;
+  margin-right: -8rpx;
+}
+
+.metric-item {
+  width: 50%;
+  padding-left: 8rpx;
+  padding-right: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.group-card {
+  padding-top: 22rpx;
+}
+</style>

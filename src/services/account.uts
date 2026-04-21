@@ -1,0 +1,19 @@
+import { getCompanyPageDataMock, getProfilePageDataMock } from '@/src/mock/account.uts'
+import { request } from '@/src/network/http.uts'
+import { CompanyPageData, ProfilePageData } from '@/src/types/models.uts'
+
+export function fetchProfilePageData(): Promise<ProfilePageData> {
+  return request<ProfilePageData>({
+    path: '/profile',
+    method: 'GET',
+    mockData: getProfilePageDataMock(),
+  })
+}
+
+export function fetchCompanyPageData(): Promise<CompanyPageData> {
+  return request<CompanyPageData>({
+    path: '/company',
+    method: 'GET',
+    mockData: getCompanyPageDataMock(),
+  })
+}

@@ -1,0 +1,11 @@
+import { getAlbumPageDataMock } from '@/src/mock/album.uts'
+import { request } from '@/src/network/http.uts'
+import { AlbumPageData } from '@/src/types/models.uts'
+
+export function fetchAlbumPageData(): Promise<AlbumPageData> {
+  return request<AlbumPageData>({
+    path: '/albums',
+    method: 'GET',
+    mockData: getAlbumPageDataMock(),
+  })
+}

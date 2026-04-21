@@ -1,0 +1,324 @@
+export type Tone = 'primary' | 'success' | 'warning' | 'neutral'
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+
+export type ApiEnvelope<T> = {
+  code: number
+  message: string
+  data: T
+}
+
+export type HttpRequestConfig<T> = {
+  path: string
+  method?: HttpMethod
+  data?: any | null
+  header?: UTSJSONObject | null
+  mockData?: T | null
+  mockDelay?: number
+}
+
+export type MetricCardModel = {
+  label: string
+  value: string
+  delta: string
+  note: string
+  tone: Tone
+}
+
+export type QuickEntry = {
+  title: string
+  subtitle: string
+  badge: string
+  route: string
+  tone: Tone
+}
+
+export type WorkflowStep = {
+  title: string
+  description: string
+  statusText: string
+  statusTone: Tone
+}
+
+export type DeviceCard = {
+  id: string
+  name: string
+  location: string
+  status: string
+  statusTone: Tone
+  connection: string
+  battery: string
+  updatedAt: string
+}
+
+export type HomeDashboard = {
+  greeting: string
+  subtitle: string
+  metrics: Array<MetricCardModel>
+  quickEntries: Array<QuickEntry>
+  workflow: Array<WorkflowStep>
+  devices: Array<DeviceCard>
+  notices: Array<string>
+}
+
+export type MenuItem = {
+  title: string
+  description: string
+  badge: string
+  route: string
+  tone: Tone
+}
+
+export type MenuGroup = {
+  title: string
+  description: string
+  items: Array<MenuItem>
+}
+
+export type MineDashboard = {
+  userName: string
+  role: string
+  company: string
+  subtitle: string
+  avatarText: string
+  stats: Array<MetricCardModel>
+  menuGroups: Array<MenuGroup>
+}
+
+export type AlbumSummary = {
+  totalCount: number
+  pendingCount: number
+  syncedCount: number
+}
+
+export type AlbumItem = {
+  id: string
+  title: string
+  capturedAt: string
+  deviceName: string
+  status: string
+  statusTone: Tone
+  summary: string
+  tags: Array<string>
+}
+
+export type AlbumPageData = {
+  overview: string
+  summary: AlbumSummary
+  storageHint: string
+  items: Array<AlbumItem>
+}
+
+export type BindMethod = {
+  title: string
+  description: string
+  helper: string
+  actionLabel: string
+  tone: Tone
+}
+
+export type BindPageData = {
+  overview: string
+  steps: Array<WorkflowStep>
+  methods: Array<BindMethod>
+  supportText: string
+}
+
+export type DevicePageData = {
+  overview: string
+  tags: Array<string>
+  devices: Array<DeviceCard>
+}
+
+export type InfoField = {
+  label: string
+  value: string
+  helper: string
+}
+
+export type ProfilePageData = {
+  title: string
+  description: string
+  tags: Array<string>
+  fields: Array<InfoField>
+}
+
+export type FieldStatus = {
+  label: string
+  value: string
+  status: string
+  statusTone: Tone
+}
+
+export type CompanyPageData = {
+  companyName: string
+  status: string
+  statusTone: Tone
+  completionRate: number
+  fields: Array<FieldStatus>
+  checklist: Array<string>
+}
+
+export type ScreenRoom = {
+  name: string
+  mode: string
+  deviceCount: string
+  status: string
+  statusTone: Tone
+  description: string
+}
+
+export type ScreenPageData = {
+  summary: string
+  rooms: Array<ScreenRoom>
+  tips: Array<string>
+}
+
+export type GuideSection = {
+  title: string
+  description: string
+  points: Array<string>
+}
+
+export type GuidePageData = {
+  summary: string
+  sections: Array<GuideSection>
+  contact: string
+}
+
+export type PermissionItem = {
+  title: string
+  description: string
+  status: string
+  statusTone: Tone
+  actionLabel: string
+}
+
+export type PermissionPageData = {
+  summary: string
+  permissions: Array<PermissionItem>
+  note: string
+}
+
+export type SettingItem = {
+  id: string
+  title: string
+  description: string
+  enabled: boolean
+}
+
+export type SettingGroup = {
+  title: string
+  items: Array<SettingItem>
+}
+
+export type SettingsPageData = {
+  versionName: string
+  lastSync: string
+  groups: Array<SettingGroup>
+}
+
+export function createEmptyHomeDashboard(): HomeDashboard {
+  return {
+    greeting: '',
+    subtitle: '',
+    metrics: [],
+    quickEntries: [],
+    workflow: [],
+    devices: [],
+    notices: [],
+  }
+}
+
+export function createEmptyMineDashboard(): MineDashboard {
+  return {
+    userName: '',
+    role: '',
+    company: '',
+    subtitle: '',
+    avatarText: '',
+    stats: [],
+    menuGroups: [],
+  }
+}
+
+export function createEmptyAlbumPageData(): AlbumPageData {
+  return {
+    overview: '',
+    summary: {
+      totalCount: 0,
+      pendingCount: 0,
+      syncedCount: 0,
+    },
+    storageHint: '',
+    items: [],
+  }
+}
+
+export function createEmptyBindPageData(): BindPageData {
+  return {
+    overview: '',
+    steps: [],
+    methods: [],
+    supportText: '',
+  }
+}
+
+export function createEmptyDevicePageData(): DevicePageData {
+  return {
+    overview: '',
+    tags: [],
+    devices: [],
+  }
+}
+
+export function createEmptyProfilePageData(): ProfilePageData {
+  return {
+    title: '',
+    description: '',
+    tags: [],
+    fields: [],
+  }
+}
+
+export function createEmptyCompanyPageData(): CompanyPageData {
+  return {
+    companyName: '',
+    status: '',
+    statusTone: 'neutral',
+    completionRate: 0,
+    fields: [],
+    checklist: [],
+  }
+}
+
+export function createEmptyScreenPageData(): ScreenPageData {
+  return {
+    summary: '',
+    rooms: [],
+    tips: [],
+  }
+}
+
+export function createEmptyGuidePageData(): GuidePageData {
+  return {
+    summary: '',
+    sections: [],
+    contact: '',
+  }
+}
+
+export function createEmptyPermissionPageData(): PermissionPageData {
+  return {
+    summary: '',
+    permissions: [],
+    note: '',
+  }
+}
+
+export function createEmptySettingsPageData(): SettingsPageData {
+  return {
+    versionName: '',
+    lastSync: '',
+    groups: [],
+  }
+}

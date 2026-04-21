@@ -1,0 +1,11 @@
+import { getHomeDashboardMock } from '@/src/mock/home.uts'
+import { request } from '@/src/network/http.uts'
+import { HomeDashboard } from '@/src/types/models.uts'
+
+export function fetchHomeDashboard(): Promise<HomeDashboard> {
+  return request<HomeDashboard>({
+    path: '/dashboard/home',
+    method: 'GET',
+    mockData: getHomeDashboardMock(),
+  })
+}

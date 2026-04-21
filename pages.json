@@ -1,0 +1,99 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "Email Login"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/album/index",
+      "style": {
+        "navigationBarTitleText": "我的相册"
+      }
+    },
+    {
+      "path": "pages/device/bind",
+      "style": {
+        "navigationBarTitleText": "绑定设备"
+      }
+    },
+    {
+      "path": "pages/device/list",
+      "style": {
+        "navigationBarTitleText": "我的设备"
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "个人信息"
+      }
+    },
+    {
+      "path": "pages/company/index",
+      "style": {
+        "navigationBarTitleText": "企业注册"
+      }
+    },
+    {
+      "path": "pages/screen/index",
+      "style": {
+        "navigationBarTitleText": "投屏管理"
+      }
+    },
+    {
+      "path": "pages/guide/index",
+      "style": {
+        "navigationBarTitleText": "操作指南"
+      }
+    },
+    {
+      "path": "pages/settings/index",
+      "style": {
+        "navigationBarTitleText": "设置"
+      }
+    },
+    {
+      "path": "pages/permissions/index",
+      "style": {
+        "navigationBarTitleText": "权限中心"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "澄镜智控",
+    "navigationBarBackgroundColor": "#F3EEE5",
+    "backgroundColor": "#F3EEE5"
+  },
+  "tabBar": {
+    "color": "#6E7368",
+    "selectedColor": "#1F4B4E",
+    "backgroundColor": "#FBF7F1",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "uniIdRouter": {}
+}

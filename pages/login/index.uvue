@@ -1,0 +1,399 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell login-page">
+      <view class="login-aura login-aura--left"></view>
+      <view class="login-aura login-aura--right"></view>
+
+      <view class="login-hero">
+        <text class="login-kicker">EMAIL ACCESS</text>
+        <text class="login-title">Sign In To ClearMirror</text>
+        <text class="login-subtitle">
+          A quiet login layer for device, album and screen workflows across iOS, Android and HarmonyOS.
+        </text>
+      </view>
+
+      <view class="surface-card auth-card">
+        <text class="auth-eyebrow">Workspace Login</text>
+        <text class="auth-heading">Use email and password</text>
+        <text class="auth-description">
+          Demo mode is enabled. Enter any valid email and a password with at least 6 characters.
+        </text>
+
+        <view class="auth-field">
+          <text class="auth-label">Email</text>
+          <view :class="pageState.emailError ? 'auth-input-shell auth-input-shell--error' : 'auth-input-shell'">
+            <input
+              class="auth-input"
+              v-model="pageState.email"
+              type="text"
+              placeholder="name@company.com"
+              placeholder-style="color:#8A938B;font-size:14px;"
+              :disabled="pageState.loading"
+            />
+          </view>
+        </view>
+
+        <view class="auth-field">
+          <view class="auth-inline-head">
+            <text class="auth-label">Password</text>
+            <view class="field-toggle" @tap="togglePasswordMask">
+              <text class="field-toggle-text">{{ pageState.maskPassword ? 'Show' : 'Hide' }}</text>
+            </view>
+          </view>
+          <view :class="pageState.passwordError ? 'auth-input-shell auth-input-shell--error' : 'auth-input-shell'">
+            <input
+              class="auth-input"
+              v-model="pageState.password"
+              type="text"
+              :password="pageState.maskPassword"
+              placeholder="At least 6 characters"
+              placeholder-style="color:#8A938B;font-size:14px;"
+              :disabled="pageState.loading"
+            />
+          </view>
+        </view>
+
+        <view v-if="pageState.errorMessage.length > 0" class="auth-error-row">
+          <text class="auth-error-text">{{ pageState.errorMessage }}</text>
+        </view>
+
+        <view :class="pageState.loading ? 'primary-button auth-submit auth-submit--disabled' : 'primary-button auth-submit'" @tap="submitLogin">
+          <text class="primary-button-text">{{ pageState.loading ? 'Signing In...' : 'Sign In' }}</text>
+        </view>
+
+        <view class="auth-actions">
+          <view class="ghost-button auth-action" @tap="fillDemoCredentials">
+            <text class="ghost-button-text">Use Demo</text>
+          </view>
+          <view class="ghost-button auth-action" @tap="showResetHint">
+            <text class="ghost-button-text">Forgot Password</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="surface-card login-note">
+        <text class="login-note-title">Cross-Platform Ready</text>
+        <text class="login-note-copy">
+          Built with uni-app x native components and UTS form state, so the same page structure works on iOS,
+          Android and HarmonyOS.
+        </text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import { ROUTES } from '@/src/constants/routes.uts'
+import { loginWithEmail } from '@/src/services/auth.uts'
+import { openRoute } from '@/src/utils/navigation.uts'
+
+const pageState = reactive({
+  email: '',
+  password: '',
+  errorMessage: '',
+  emailError: false,
+  passwordError: false,
+  loading: false,
+  maskPassword: true,
+} as LoginPageState)
+
+type LoginPageState = {
+  email: string
+  password: string
+  errorMessage: string
+  emailError: boolean
+  passwordError: boolean
+  loading: boolean
+  maskPassword: boolean
+}
+
+function validateEmail(email: string): string {
+  const value = email.trim()
+  if (value.length == 0) {
+    return 'Email is required'
+  }
+
+  const atIndex = value.indexOf('@')
+  const dotIndex = value.lastIndexOf('.')
+  if (atIndex <= 0 || dotIndex <= atIndex + 1 || dotIndex >= value.length - 1) {
+    return 'Enter a valid email address'
+  }
+
+  return ''
+}
+
+function validatePassword(password: string): string {
+  if (password.length == 0) {
+    return 'Password is required'
+  }
+  if (password.length < 6) {
+    return 'Password must be at least 6 characters'
+  }
+  return ''
+}
+
+function runValidation(): boolean {
+  const emailErrorMessage = validateEmail(pageState.email)
+  const passwordErrorMessage = validatePassword(pageState.password)
+
+  pageState.emailError = emailErrorMessage.length > 0
+  pageState.passwordError = passwordErrorMessage.length > 0
+
+  if (emailErrorMessage.length > 0) {
+    pageState.errorMessage = emailErrorMessage
+    return false
+  }
+  if (passwordErrorMessage.length > 0) {
+    pageState.errorMessage = passwordErrorMessage
+    return false
+  }
+
+  pageState.errorMessage = ''
+  return true
+}
+
+function togglePasswordMask(): void {
+  pageState.maskPassword = !pageState.maskPassword
+}
+
+function fillDemoCredentials(): void {
+  if (pageState.loading) {
+    return
+  }
+  pageState.email = 'operator@clearmirror.example'
+  pageState.password = 'clear123'
+  pageState.emailError = false
+  pageState.passwordError = false
+  pageState.errorMessage = ''
+}
+
+function showResetHint(): void {
+  uni.showToast({
+    title: 'Connect your reset API here',
+    icon: 'none',
+  })
+}
+
+async function submitLogin(): Promise<void> {
+  if (pageState.loading) {
+    return
+  }
+
+  if (!runValidation()) {
+    uni.showToast({
+      title: pageState.errorMessage,
+      icon: 'none',
+    })
+    return
+  }
+
+  pageState.loading = true
+  pageState.errorMessage = ''
+  pageState.email = pageState.email.trim()
+
+  try {
+    await loginWithEmail(pageState.email, pageState.password)
+    uni.showToast({
+      title: 'Login success',
+      icon: 'success',
+    })
+    setTimeout(() => {
+      openRoute(ROUTES.HOME)
+    }, 220)
+  } catch (error) {
+    pageState.errorMessage = 'Unable to sign in right now'
+    uni.showToast({
+      title: pageState.errorMessage,
+      icon: 'none',
+    })
+  }
+
+  pageState.loading = false
+}
+</script>
+
+<style lang="scss">
+.login-page {
+  position: relative;
+  min-height: 100%;
+  padding-top: 18rpx;
+}
+
+.login-aura {
+  position: absolute;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 140rpx;
+  background-color: rgba(31, 75, 78, 0.08);
+}
+
+.login-aura--left {
+  top: 20rpx;
+  left: -90rpx;
+}
+
+.login-aura--right {
+  top: 260rpx;
+  right: -100rpx;
+  background-color: rgba(165, 109, 66, 0.1);
+}
+
+.login-hero {
+  position: relative;
+  margin-bottom: 24rpx;
+  padding: 20rpx 4rpx 10rpx;
+}
+
+.login-kicker {
+  font-size: 22rpx;
+  letter-spacing: 5rpx;
+  color: $app-primary;
+}
+
+.login-title {
+  margin-top: 18rpx;
+  font-size: 58rpx;
+  line-height: 1.04;
+  font-weight: 700;
+  color: #173237;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.login-subtitle {
+  margin-top: 18rpx;
+  font-size: 26rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+
+.auth-card {
+  position: relative;
+  padding: 34rpx 28rpx 28rpx;
+  background-color: rgba(251, 247, 241, 0.94);
+}
+
+.auth-eyebrow {
+  font-size: 20rpx;
+  letter-spacing: 3rpx;
+  color: $app-muted;
+}
+
+.auth-heading {
+  margin-top: 14rpx;
+  font-size: 36rpx;
+  line-height: 1.2;
+  font-weight: 700;
+  color: $app-text;
+}
+
+.auth-description {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: $app-muted;
+}
+
+.auth-field {
+  margin-top: 24rpx;
+}
+
+.auth-label {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: $app-text;
+}
+
+.auth-inline-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field-toggle {
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
+  padding-left: 12rpx;
+  padding-right: 12rpx;
+}
+
+.field-toggle-text {
+  font-size: 22rpx;
+  color: $app-primary;
+}
+
+.auth-input-shell {
+  margin-top: 12rpx;
+  padding-left: 20rpx;
+  padding-right: 20rpx;
+  border-radius: 22rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(31, 75, 78, 0.1);
+  background-color: #ffffff;
+}
+
+.auth-input-shell--error {
+  border-color: rgba(165, 109, 66, 0.48);
+  background-color: rgba(165, 109, 66, 0.04);
+}
+
+.auth-input {
+  height: 92rpx;
+  font-size: 28rpx;
+  color: $app-text;
+}
+
+.auth-error-row {
+  margin-top: 18rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 20rpx;
+  background-color: rgba(165, 109, 66, 0.08);
+}
+
+.auth-error-text {
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: $app-warning;
+}
+
+.auth-submit {
+  margin-top: 26rpx;
+  align-items: center;
+  justify-content: center;
+  min-height: 92rpx;
+}
+
+.auth-submit--disabled {
+  opacity: 0.7;
+}
+
+.auth-actions {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 16rpx;
+}
+
+.auth-action {
+  width: 48%;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-note {
+  padding-top: 24rpx;
+  background-color: rgba(247, 242, 234, 0.9);
+}
+
+.login-note-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: $app-text;
+}
+
+.login-note-copy {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+</style>

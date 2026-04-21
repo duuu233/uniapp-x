@@ -1,0 +1,13 @@
+export type AppConfig = {
+  appName: string
+  apiBaseUrl: string
+  requestTimeout: number
+  useMock: boolean
+}
+
+export const appConfig: AppConfig = {
+  appName: '澄镜智控',
+  apiBaseUrl: 'https://api.example.com',
+  requestTimeout: 15000,
+  useMock: true,
+}

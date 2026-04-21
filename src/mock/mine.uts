@@ -1,0 +1,111 @@
+import { ROUTES } from '@/src/constants/routes.uts'
+import { MineDashboard } from '@/src/types/models.uts'
+
+export function getMineDashboardMock(): MineDashboard {
+  return {
+    userName: '王安然',
+    role: '平台主管',
+    company: '上海澄镜数字科技',
+    subtitle: '以账号、设备与系统工具为核心，保持入口稳定且便于权限扩展。',
+    avatarText: 'WA',
+    stats: [
+      {
+        label: '负责设备',
+        value: '12',
+        delta: '核心资产',
+        note: '包含 3 台演示大屏',
+        tone: 'primary',
+      },
+      {
+        label: '本周相册',
+        value: '37',
+        delta: '+11',
+        note: '新增采集记录',
+        tone: 'success',
+      },
+      {
+        label: '待处理事项',
+        value: '04',
+        delta: '优先跟进',
+        note: '权限与绑定异常',
+        tone: 'warning',
+      },
+    ],
+    menuGroups: [
+      {
+        title: '账户信息',
+        description: '围绕个人身份与企业主体做统一维护。',
+        items: [
+          {
+            title: '个人信息',
+            description: '维护姓名、手机号、员工 ID 与角色。',
+            badge: '已实名',
+            route: ROUTES.PROFILE,
+            tone: 'success',
+          },
+          {
+            title: '企业注册',
+            description: '查看企业主体资料与审核状态。',
+            badge: '审核通过',
+            route: ROUTES.COMPANY,
+            tone: 'primary',
+          },
+        ],
+      },
+      {
+        title: '资产与设备',
+        description: '聚焦相册、设备和绑定流程的高频入口。',
+        items: [
+          {
+            title: '我的相册',
+            description: '查看图片记录、标签与同步结果。',
+            badge: '128 张',
+            route: ROUTES.ALBUM,
+            tone: 'primary',
+          },
+          {
+            title: '我的设备',
+            description: '统一查看设备状态、位置和连接方式。',
+            badge: '24 台',
+            route: ROUTES.DEVICE_LIST,
+            tone: 'neutral',
+          },
+          {
+            title: '绑定设备',
+            description: '通过扫码、蓝牙或 SN 号接入新设备。',
+            badge: '标准流程',
+            route: ROUTES.DEVICE_BIND,
+            tone: 'success',
+          },
+        ],
+      },
+      {
+        title: '系统工具',
+        description: '沉淀运维、投屏和系统配置能力。',
+        items: [
+          {
+            title: '投屏管理',
+            description: '管理投屏房间、屏幕模式和联动场景。',
+            badge: '8 个房间',
+            route: ROUTES.SCREEN,
+            tone: 'primary',
+          },
+          {
+            title: '操作指南',
+            description: '快速查看绑定、采集与异常排查流程。',
+            badge: '4 个章节',
+            route: ROUTES.GUIDE,
+            tone: 'neutral',
+          },
+          {
+            title: '设置',
+            description: '维护同步、通知、权限提醒与安全策略。',
+            badge: '3 项已开启',
+            route: ROUTES.SETTINGS,
+            tone: 'warning',
+          },
+        ],
+      },
+    ],
+  }
+}

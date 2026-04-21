@@ -1,0 +1,45 @@
+import { appConfig } from '@/src/config/app.uts'
+import { ApiEnvelope, HttpRequestConfig } from '@/src/types/models.uts'
+
+function buildUrl(path: string): string {
+  if (path.indexOf('http') == 0) {
+    return path
+  }
+  return appConfig.apiBaseUrl + path
+}
+
+export function request<T>(config: HttpRequestConfig<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    if (appConfig.useMock && config.mockData != null) {
+      const delay = config.mockDelay != null ? config.mockDelay : 180
+      setTimeout(() => {
+        resolve(config.mockData as T)
+      }, delay)
+      return
+    }
+
+    // 真实接口接入时保留这一层，统一处理 baseURL、鉴权、错误消息和响应解包。
+    uni.request<ApiEnvelope<T>>({
+      url: buildUrl(config.path),
+      method: config.method != null ? config.method : 'GET',
+      data: config.data != null ? config.data : null,
+      header: config.header != null ? config.header : null,
+      timeout: appConfig.requestTimeout,
+      success: (response) => {
+        const envelope = response.data as ApiEnvelope<T>
+        if (response.statusCode < 200 || response.statusCode >= 300 || envelope == null) {
+          reject('服务返回异常，请稍后重试')
+          return
+        }
+        if (envelope.code != 0) {
+          reject(envelope.message)
+          return
+        }
+        resolve(envelope.data)
+      },
+      fail: (error) => {
+        reject(error.errMsg)
+      },
+    })
+  })
+}

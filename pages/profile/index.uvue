@@ -1,0 +1,109 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">PROFILE</text>
+        <text class="page-title">{{ pageState.profile.title }}</text>
+        <text class="page-subtitle">{{ pageState.profile.description }}</text>
+        <view class="tag-row">
+          <view v-for="tag in pageState.profile.tags" :key="tag" class="tag-chip">
+            <text class="tag-chip-text">{{ tag }}</text>
+          </view>
+        </view>
+      </view>
+
+      <AppSection eyebrow="资料" title="字段明细" subtitle="后续可扩展为表单编辑、上传头像和角色申请">
+        <view v-for="field in pageState.profile.fields" :key="field.label" class="info-row">
+          <view class="info-row-copy">
+            <text class="info-label">{{ field.label }}</text>
+            <text class="info-value">{{ field.value }}</text>
+            <text class="info-helper">{{ field.helper }}</text>
+          </view>
+        </view>
+      </AppSection>
+
+      <view class="action-row">
+        <view class="ghost-button action-button" @tap="showHint('已预留资料编辑入口')">
+          <text class="ghost-button-text">编辑资料</text>
+        </view>
+        <view class="primary-button action-button" @tap="showHint('已预留提交接口')">
+          <text class="primary-button-text">提交更新</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchProfilePageData } from '@/src/services/account.uts'
+import { ProfilePageData, createEmptyProfilePageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  profile: createEmptyProfilePageData() as ProfilePageData,
+} as ProfilePageState)
+
+type ProfilePageState = {
+  loading: boolean
+  profile: ProfilePageData
+}
+
+async function loadProfile() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const profile = await fetchProfilePageData({ userId: currentUserId.value })
+    const profile = await fetchProfilePageData()
+    pageState.profile = profile
+  } catch (error) {
+    uni.showToast({
+      title: '个人资料加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+function showHint(message: string): void {
+  uni.showToast({
+    title: message,
+    icon: 'none',
+  })
+}
+
+onLoad(() => {
+  loadProfile()
+})
+</script>
+
+<style lang="scss">
+.tag-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+
+.tag-chip {
+  margin-right: 12rpx;
+  margin-bottom: 12rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background-color: rgba(31, 75, 78, 0.06);
+}
+
+.tag-chip-text {
+  font-size: 22rpx;
+  color: $app-primary;
+}
+
+.action-row {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.action-button {
+  width: 48%;
+  align-items: center;
+}
+</style>

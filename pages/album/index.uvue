@@ -1,0 +1,165 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">ALBUM CENTER</text>
+        <text class="page-title">我的相册</text>
+        <text class="page-subtitle">{{ pageState.album.overview }}</text>
+      </view>
+
+      <view class="summary-grid">
+        <view class="summary-box">
+          <text class="summary-label">总记录</text>
+          <text class="summary-value">{{ pageState.album.summary.totalCount }}</text>
+        </view>
+        <view class="summary-box">
+          <text class="summary-label">待同步</text>
+          <text class="summary-value">{{ pageState.album.summary.pendingCount }}</text>
+        </view>
+        <view class="summary-box">
+          <text class="summary-label">已同步</text>
+          <text class="summary-value">{{ pageState.album.summary.syncedCount }}</text>
+        </view>
+      </view>
+
+      <AppSection eyebrow="记录" title="最近上传" subtitle="此处可继续扩展搜索、筛选、批量操作和审核状态">
+        <view v-for="item in pageState.album.items" :key="item.id" class="album-card">
+          <view class="row-between">
+            <text class="album-title">{{ item.title }}</text>
+            <view :class="'tone-pill tone-pill--' + item.statusTone">
+              <text :class="'tone-pill-text tone-pill-text--' + item.statusTone">{{ item.status }}</text>
+            </view>
+          </view>
+          <text class="album-meta">{{ item.capturedAt }} · {{ item.deviceName }}</text>
+          <text class="album-summary">{{ item.summary }}</text>
+          <view class="album-tags">
+            <view v-for="tag in item.tags" :key="tag" class="album-tag">
+              <text class="album-tag-text">{{ tag }}</text>
+            </view>
+          </view>
+        </view>
+      </AppSection>
+
+      <AppSection eyebrow="存储策略" title="缓存与扩展" subtitle="建议把压缩、上传、归档策略收敛到 service 和 upload 模块">
+        <text class="hint-text">{{ pageState.album.storageHint }}</text>
+      </AppSection>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchAlbumPageData } from '@/src/services/album.uts'
+import { AlbumPageData, createEmptyAlbumPageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  album: createEmptyAlbumPageData() as AlbumPageData,
+} as AlbumPageState)
+
+type AlbumPageState = {
+  loading: boolean
+  album: AlbumPageData
+}
+
+async function loadAlbumData() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const albumData = await fetchAlbumPageData({ pageNo: 1, pageSize: 20 })
+    const albumData = await fetchAlbumPageData()
+    pageState.album = albumData
+  } catch (error) {
+    uni.showToast({
+      title: '相册数据加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+onLoad(() => {
+  loadAlbumData()
+})
+</script>
+
+<style lang="scss">
+.summary-grid {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.summary-box {
+  width: 31%;
+  padding: 24rpx 18rpx;
+  border-radius: 24rpx;
+  background-color: $app-panel;
+  border-width: 1px;
+  border-style: solid;
+  border-color: $app-border;
+  box-shadow: $app-shadow-soft;
+}
+
+.summary-label {
+  font-size: 22rpx;
+  color: $app-muted;
+}
+
+.summary-value {
+  margin-top: 16rpx;
+  font-size: 46rpx;
+  line-height: 1.1;
+  font-weight: 700;
+  color: $app-text;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.album-card {
+  padding-top: 10rpx;
+  padding-bottom: 18rpx;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(213, 204, 190, 0.7);
+}
+
+.album-title {
+  flex: 1;
+  padding-right: 14rpx;
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.album-meta {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: $app-muted;
+}
+
+.album-summary {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: $app-text;
+}
+
+.album-tags {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 14rpx;
+}
+
+.album-tag {
+  margin-right: 12rpx;
+  margin-bottom: 10rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background-color: rgba(31, 75, 78, 0.06);
+}
+
+.album-tag-text {
+  font-size: 22rpx;
+  color: $app-primary;
+}
+</style>

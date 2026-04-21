@@ -1,0 +1,123 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">SCREEN CONTROL</text>
+        <text class="page-title">投屏管理</text>
+        <text class="page-subtitle">{{ pageState.screen.summary }}</text>
+      </view>
+
+      <AppSection eyebrow="房间" title="投屏房间" subtitle="后续可对接实时在线状态、素材编排和排期能力">
+        <view v-for="room in pageState.screen.rooms" :key="room.name" class="room-card">
+          <view class="row-between">
+            <text class="room-title">{{ room.name }}</text>
+            <view :class="'tone-pill tone-pill--' + room.statusTone">
+              <text :class="'tone-pill-text tone-pill-text--' + room.statusTone">{{ room.status }}</text>
+            </view>
+          </view>
+          <text class="room-mode">{{ room.mode }} · {{ room.deviceCount }}</text>
+          <text class="room-desc">{{ room.description }}</text>
+        </view>
+      </AppSection>
+
+      <AppSection eyebrow="维护" title="实施建议" subtitle="建议把播放策略与屏幕日志拆成独立服务模块">
+        <view v-for="tip in pageState.screen.tips" :key="tip" class="tip-row">
+          <view class="tip-dot"></view>
+          <text class="tip-text">{{ tip }}</text>
+        </view>
+      </AppSection>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchScreenPageData } from '@/src/services/system.uts'
+import { ScreenPageData, createEmptyScreenPageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  screen: createEmptyScreenPageData() as ScreenPageData,
+} as ScreenPageState)
+
+type ScreenPageState = {
+  loading: boolean
+  screen: ScreenPageData
+}
+
+async function loadScreenData() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const screenData = await fetchScreenPageData({ tenantId: currentTenantId.value })
+    const screenData = await fetchScreenPageData()
+    pageState.screen = screenData
+  } catch (error) {
+    uni.showToast({
+      title: '投屏数据加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+onLoad(() => {
+  loadScreenData()
+})
+</script>
+
+<style lang="scss">
+.room-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx 22rpx;
+  border-radius: 24rpx;
+  background-color: $app-surface;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(213, 204, 190, 0.8);
+}
+
+.room-title {
+  flex: 1;
+  padding-right: 14rpx;
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.room-mode {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: $app-primary;
+}
+
+.room-desc {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: $app-muted;
+}
+
+.tip-row {
+  flex-direction: row;
+  align-items: flex-start;
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
+}
+
+.tip-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 12rpx;
+  margin-right: 14rpx;
+  border-radius: 6rpx;
+  background-color: $app-primary;
+}
+
+.tip-text {
+  flex: 1;
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+</style>

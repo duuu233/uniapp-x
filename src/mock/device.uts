@@ -1,0 +1,100 @@
+import { BindPageData, DevicePageData } from '@/src/types/models.uts'
+
+export function getBindPageDataMock(): BindPageData {
+  return {
+    overview: '绑定流程保持轻量，支持扫码、蓝牙发现和手动录入三种方式，适合巡检与标准办公场景。',
+    steps: [
+      {
+        title: '选择绑定方式',
+        description: '根据现场条件选择扫码、蓝牙发现或 SN 号录入。',
+        statusText: '步骤一',
+        statusTone: 'primary',
+      },
+      {
+        title: '确认设备身份',
+        description: '读取设备名称、位置、序列号与负责人信息。',
+        statusText: '步骤二',
+        statusTone: 'neutral',
+      },
+      {
+        title: '写入组织关系',
+        description: '绑定成功后自动进入“我的设备”和投屏管理。',
+        statusText: '步骤三',
+        statusTone: 'success',
+      },
+    ],
+    methods: [
+      {
+        title: '扫码绑定',
+        description: '适合新机首次接入，效率最高。',
+        helper: '读取设备背贴二维码并自动识别序列号。',
+        actionLabel: '立即扫码',
+        tone: 'primary',
+      },
+      {
+        title: '蓝牙发现',
+        description: '适合近距离批量部署和巡检现场。',
+        helper: '自动搜索附近设备并展示信号强度。',
+        actionLabel: '开始搜索',
+        tone: 'success',
+      },
+      {
+        title: '手动录入',
+        description: '适合设备条码损坏或离线登记场景。',
+        helper: '根据设备 SN 号和名称进行绑定。',
+        actionLabel: '手动填写',
+        tone: 'warning',
+      },
+    ],
+    supportText: '绑定成功后建议立即补充位置、负责人和投屏分组，方便后续检索与统计。',
+  }
+}
+
+export function getDevicePageDataMock(): DevicePageData {
+  return {
+    overview: '我的设备页强调统一纳管和快速检索，默认展示状态、位置、连接方式与最近更新时间。',
+    tags: ['全部', '在线', '待授权', '演示大屏', '移动终端'],
+    devices: [
+      {
+        id: 'device-a01',
+        name: '大厅演示屏 A01',
+        location: '总部 1F 接待区',
+        status: '在线',
+        statusTone: 'success',
+        connection: 'Wi-Fi 6 / 4K 投屏',
+        battery: '外接电源',
+        updatedAt: '2 分钟前',
+      },
+      {
+        id: 'device-b03',
+        name: '会议平板 B03',
+        location: '总部 6F 多功能厅',
+        status: '在线',
+        statusTone: 'primary',
+        connection: '有线局域网 / 1080P',
+        battery: '外接电源',
+        updatedAt: '18 分钟前',
+      },
+      {
+        id: 'device-c08',
+        name: '移动采集终端 C08',
+        location: '华东巡检组',
+        status: '待授权',
+        statusTone: 'warning',
+        connection: '5G / 蓝牙',
+        battery: '73%',
+        updatedAt: '6 分钟前',
+      },
+      {
+        id: 'device-d11',
+        name: '门店样机 D11',
+        location: '浦东体验店',
+        status: '低频使用',
+        statusTone: 'neutral',
+        connection: 'Wi-Fi / 1080P',
+        battery: '外接电源',
+        updatedAt: '1 小时前',
+      },
+    ],
+  }
+}

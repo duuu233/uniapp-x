@@ -1,0 +1,27 @@
+function buildDemoDisplayName(email: string): string {
+  const atIndex = email.indexOf('@')
+  if (atIndex <= 0) {
+    return 'Operator'
+  }
+  return email.substring(0, atIndex)
+}
+
+export function loginWithEmail(email: string, password: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const normalizedEmail = email.trim()
+    if (normalizedEmail.length == 0) {
+      reject('Please enter your email address')
+      return
+    }
+    if (password.length < 6) {
+      reject('Password must be at least 6 characters')
+      return
+    }
+
+    setTimeout(() => {
+      const displayName = buildDemoDisplayName(normalizedEmail)
+      console.log('mock login success for ' + displayName)
+      resolve(true)
+    }, 420)
+  })
+}

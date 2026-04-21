@@ -1,0 +1,19 @@
+import { getBindPageDataMock, getDevicePageDataMock } from '@/src/mock/device.uts'
+import { request } from '@/src/network/http.uts'
+import { BindPageData, DevicePageData } from '@/src/types/models.uts'
+
+export function fetchBindPageData(): Promise<BindPageData> {
+  return request<BindPageData>({
+    path: '/devices/bind/options',
+    method: 'GET',
+    mockData: getBindPageDataMock(),
+  })
+}
+
+export function fetchDevicePageData(): Promise<DevicePageData> {
+  return request<DevicePageData>({
+    path: '/devices',
+    method: 'GET',
+    mockData: getDevicePageDataMock(),
+  })
+}

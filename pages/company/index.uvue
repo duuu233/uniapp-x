@@ -1,0 +1,124 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">COMPANY</text>
+        <text class="page-title">{{ pageState.company.companyName }}</text>
+        <view class="hero-status">
+          <view :class="'tone-pill tone-pill--' + pageState.company.statusTone">
+            <text :class="'tone-pill-text tone-pill-text--' + pageState.company.statusTone">{{ pageState.company.status }}</text>
+          </view>
+          <text class="hero-status-text">资料完成度 {{ pageState.company.completionRate }}%</text>
+        </view>
+        <view class="progress-track">
+          <view class="progress-fill" :style="'width:' + pageState.company.completionRate + '%'"></view>
+        </view>
+      </view>
+
+      <AppSection eyebrow="主体资料" title="企业注册信息" subtitle="字段状态与审核状态分开展示，便于后续接入审批流">
+        <view v-for="field in pageState.company.fields" :key="field.label" class="info-row">
+          <view class="info-row-copy">
+            <text class="info-label">{{ field.label }}</text>
+            <text class="info-value">{{ field.value }}</text>
+          </view>
+          <view :class="'tone-pill tone-pill--' + field.statusTone">
+            <text :class="'tone-pill-text tone-pill-text--' + field.statusTone">{{ field.status }}</text>
+          </view>
+        </view>
+      </AppSection>
+
+      <AppSection eyebrow="合规检查" title="上线前建议" subtitle="把经常变化的校验项配置化，而不是直接写死在页面中">
+        <view v-for="item in pageState.company.checklist" :key="item" class="check-row">
+          <view class="check-dot"></view>
+          <text class="check-text">{{ item }}</text>
+        </view>
+      </AppSection>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchCompanyPageData } from '@/src/services/account.uts'
+import { CompanyPageData, createEmptyCompanyPageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  company: createEmptyCompanyPageData() as CompanyPageData,
+} as CompanyPageState)
+
+type CompanyPageState = {
+  loading: boolean
+  company: CompanyPageData
+}
+
+async function loadCompany() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const company = await fetchCompanyPageData({ tenantId: currentTenantId.value })
+    const company = await fetchCompanyPageData()
+    pageState.company = company
+  } catch (error) {
+    uni.showToast({
+      title: '企业资料加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+onLoad(() => {
+  loadCompany()
+})
+</script>
+
+<style lang="scss">
+.hero-status {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 18rpx;
+}
+
+.hero-status-text {
+  margin-left: 16rpx;
+  font-size: 24rpx;
+  color: $app-muted;
+}
+
+.progress-track {
+  height: 16rpx;
+  margin-top: 20rpx;
+  border-radius: 999rpx;
+  background-color: rgba(31, 75, 78, 0.08);
+}
+
+.progress-fill {
+  height: 16rpx;
+  border-radius: 999rpx;
+  background-color: $app-primary;
+}
+
+.check-row {
+  flex-direction: row;
+  align-items: flex-start;
+  padding-top: 8rpx;
+  padding-bottom: 8rpx;
+}
+
+.check-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 12rpx;
+  margin-right: 14rpx;
+  border-radius: 6rpx;
+  background-color: $app-primary;
+}
+
+.check-text {
+  flex: 1;
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: $app-muted;
+}
+</style>

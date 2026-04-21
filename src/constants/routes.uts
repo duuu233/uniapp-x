@@ -1,0 +1,33 @@
+export type RouteMap = {
+  LOGIN: string
+  HOME: string
+  MINE: string
+  ALBUM: string
+  DEVICE_BIND: string
+  DEVICE_LIST: string
+  PROFILE: string
+  COMPANY: string
+  SCREEN: string
+  GUIDE: string
+  SETTINGS: string
+  PERMISSIONS: string
+}
+
+export const ROUTES: RouteMap = {
+  LOGIN: '/pages/login/index',
+  HOME: '/pages/home/index',
+  MINE: '/pages/mine/index',
+  ALBUM: '/pages/album/index',
+  DEVICE_BIND: '/pages/device/bind',
+  DEVICE_LIST: '/pages/device/list',
+  PROFILE: '/pages/profile/index',
+  COMPANY: '/pages/company/index',
+  SCREEN: '/pages/screen/index',
+  GUIDE: '/pages/guide/index',
+  SETTINGS: '/pages/settings/index',
+  PERMISSIONS: '/pages/permissions/index',
+}
+
+export function isTabRoute(route: string): boolean {
+  return route == ROUTES.HOME || route == ROUTES.MINE
+}

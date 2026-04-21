@@ -1,0 +1,35 @@
+import { getGuidePageDataMock, getPermissionPageDataMock, getScreenPageDataMock, getSettingsPageDataMock } from '@/src/mock/system.uts'
+import { request } from '@/src/network/http.uts'
+import { GuidePageData, PermissionPageData, ScreenPageData, SettingsPageData } from '@/src/types/models.uts'
+
+export function fetchScreenPageData(): Promise<ScreenPageData> {
+  return request<ScreenPageData>({
+    path: '/screens',
+    method: 'GET',
+    mockData: getScreenPageDataMock(),
+  })
+}
+
+export function fetchGuidePageData(): Promise<GuidePageData> {
+  return request<GuidePageData>({
+    path: '/guide',
+    method: 'GET',
+    mockData: getGuidePageDataMock(),
+  })
+}
+
+export function fetchPermissionPageData(): Promise<PermissionPageData> {
+  return request<PermissionPageData>({
+    path: '/permissions',
+    method: 'GET',
+    mockData: getPermissionPageDataMock(),
+  })
+}
+
+export function fetchSettingsPageData(): Promise<SettingsPageData> {
+  return request<SettingsPageData>({
+    path: '/settings',
+    method: 'GET',
+    mockData: getSettingsPageDataMock(),
+  })
+}

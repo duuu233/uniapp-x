@@ -1,0 +1,128 @@
+<template>
+  <view :class="'metric-card metric-card--' + tone">
+    <text :class="'metric-label metric-label--' + tone">{{ label }}</text>
+    <text :class="'metric-value metric-value--' + tone">{{ value }}</text>
+    <text :class="'metric-delta metric-delta--' + tone">{{ delta }}</text>
+    <text :class="'metric-note metric-note--' + tone">{{ note }}</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+defineProps({
+  label: {
+    type: String,
+    default: '',
+  },
+  value: {
+    type: String,
+    default: '',
+  },
+  delta: {
+    type: String,
+    default: '',
+  },
+  note: {
+    type: String,
+    default: '',
+  },
+  tone: {
+    type: String,
+    default: 'primary',
+  },
+})
+</script>
+
+<style lang="scss">
+.metric-card {
+  min-height: 188rpx;
+  padding: 24rpx 22rpx;
+  border-radius: 24rpx;
+  border-width: 1px;
+  border-style: solid;
+  box-shadow: $app-shadow-soft;
+}
+
+.metric-card--primary {
+  background-color: $app-primary;
+  border-color: $app-primary;
+}
+
+.metric-card--success {
+  background-color: #edf5f0;
+  border-color: rgba(42, 106, 85, 0.12);
+}
+
+.metric-card--warning {
+  background-color: #f6efe8;
+  border-color: rgba(165, 109, 66, 0.12);
+}
+
+.metric-card--neutral {
+  background-color: #f6f3ee;
+  border-color: rgba(23, 38, 43, 0.08);
+}
+
+.metric-label {
+  font-size: 22rpx;
+}
+
+.metric-label--primary {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.metric-label--success,
+.metric-label--warning,
+.metric-label--neutral {
+  color: $app-muted;
+}
+
+.metric-value {
+  margin-top: 18rpx;
+  font-size: 52rpx;
+  line-height: 1.05;
+  font-weight: 700;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.metric-value--primary {
+  color: #ffffff;
+}
+
+.metric-value--success,
+.metric-value--warning,
+.metric-value--neutral {
+  color: $app-text;
+}
+
+.metric-delta {
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.metric-delta--primary {
+  color: #ffffff;
+}
+
+.metric-delta--success,
+.metric-delta--warning,
+.metric-delta--neutral {
+  color: $app-text;
+}
+
+.metric-note {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.metric-note--primary {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.metric-note--success,
+.metric-note--warning,
+.metric-note--neutral {
+  color: $app-text;
+}
+</style>

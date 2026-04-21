@@ -1,0 +1,14 @@
+import { isTabRoute } from '@/src/constants/routes.uts'
+
+export function openRoute(route: string): void {
+  if (isTabRoute(route)) {
+    uni.switchTab({
+      url: route,
+    })
+    return
+  }
+
+  uni.navigateTo({
+    url: route,
+  })
+}

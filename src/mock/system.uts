@@ -1,0 +1,165 @@
+import { GuidePageData, PermissionPageData, ScreenPageData, SettingsPageData } from '@/src/types/models.uts'
+
+export function getScreenPageDataMock(): ScreenPageData {
+  return {
+    summary: '投屏管理页统一管理房间、输出模式与当前占用状态，便于活动现场快速切换展示内容。',
+    rooms: [
+      {
+        name: '总部品牌展厅',
+        mode: '欢迎页轮播',
+        deviceCount: '2 台',
+        status: '运行中',
+        statusTone: 'success',
+        description: '用于访客接待与品牌展示，支持静默切换素材。',
+      },
+      {
+        name: '6F 多功能厅',
+        mode: '会议镜像',
+        deviceCount: '3 台',
+        status: '待排期',
+        statusTone: 'warning',
+        description: '适配宣讲、培训和内部例会的大屏联动场景。',
+      },
+      {
+        name: '浦东体验店',
+        mode: '商品演示',
+        deviceCount: '1 台',
+        status: '在线',
+        statusTone: 'primary',
+        description: '可远程切换演示内容并查看设备在线状态。',
+      },
+    ],
+    tips: [
+      '建议把房间、设备分组与企业组织结构做映射，降低后期维护成本。',
+      '播放素材和投屏日志建议独立成服务模块，避免页面层直接处理大体积数据。',
+    ],
+  }
+}
+
+export function getGuidePageDataMock(): GuidePageData {
+  return {
+    summary: '操作指南以关键流程为中心，不堆砌细碎说明，优先保证新用户首日可用。',
+    sections: [
+      {
+        title: '登录与首页',
+        description: '完成账号登录后，首页展示设备态势、快捷入口和重点提醒。',
+        points: [
+          '先核对个人信息与企业身份状态。',
+          '从首页高频入口进入相册、设备或权限中心。',
+        ],
+      },
+      {
+        title: '绑定设备',
+        description: '建议优先扫码绑定，其次蓝牙发现，最后使用 SN 号手动录入。',
+        points: [
+          '绑定后立刻补充位置、负责人和投屏分组。',
+          '出现异常时先检查蓝牙、定位与相机权限。',
+        ],
+      },
+      {
+        title: '相册管理',
+        description: '相册默认展示最近记录，并可扩展审核、标签和批量归档能力。',
+        points: [
+          '大图上传与压缩策略放在请求层统一处理。',
+          '相册筛选条件建议沉淀到 service 层而不是页面组件里。',
+        ],
+      },
+      {
+        title: '投屏管理',
+        description: '投屏房间与设备分组统一维护，适合活动、门店和总部展示场景。',
+        points: [
+          '房间模式建议预置模板，减少频繁人工配置。',
+          '播放内容和房间状态建议接入后台实时数据源。',
+        ],
+      },
+    ],
+    contact: '如需协助，可联系企业管理员或运维支持邮箱：ops@clearmirror.example',
+  }
+}
+
+export function getPermissionPageDataMock(): PermissionPageData {
+  return {
+    summary: '权限中心用于沉淀拍摄、相册、定位、蓝牙和通知权限状态，避免在各业务页重复校验。',
+    permissions: [
+      {
+        title: '相机权限',
+        description: '用于现场拍摄与二维码识别。',
+        status: '已开启',
+        statusTone: 'success',
+        actionLabel: '重新校验',
+      },
+      {
+        title: '相册权限',
+        description: '用于从本地相册选择图片并上传。',
+        status: '已开启',
+        statusTone: 'success',
+        actionLabel: '查看说明',
+      },
+      {
+        title: '定位权限',
+        description: '用于蓝牙发现与设备位置自动补全。',
+        status: '待确认',
+        statusTone: 'warning',
+        actionLabel: '去开启',
+      },
+      {
+        title: '蓝牙权限',
+        description: '用于搜索附近设备并完成快速绑定。',
+        status: '已开启',
+        statusTone: 'primary',
+        actionLabel: '重新扫描',
+      },
+      {
+        title: '通知权限',
+        description: '用于同步完成、审核结果和异常提醒。',
+        status: '建议开启',
+        statusTone: 'neutral',
+        actionLabel: '稍后处理',
+      },
+    ],
+    note: '权限校验建议封装为独立 composable 或平台适配层，避免页面重复写平台判断。',
+  }
+}
+
+export function getSettingsPageDataMock(): SettingsPageData {
+  return {
+    versionName: '1.0.0-mock',
+    lastSync: '今天 09:40',
+    groups: [
+      {
+        title: '通知与同步',
+        items: [
+          {
+            id: 'notification',
+            title: '系统通知',
+            description: '接收审核结果、同步状态和设备异常提醒。',
+            enabled: true,
+          },
+          {
+            id: 'auto-sync',
+            title: '自动同步',
+            description: '在 Wi-Fi 环境下自动同步图片与设备数据。',
+            enabled: true,
+          },
+        ],
+      },
+      {
+        title: '展示与安全',
+        items: [
+          {
+            id: 'screen-protect',
+            title: '投屏安全保护',
+            description: '对敏感房间开启确认弹窗与超时断开机制。',
+            enabled: true,
+          },
+          {
+            id: 'biometric',
+            title: '生物识别校验',
+            description: '进入我的设备和企业设置时进行二次确认。',
+            enabled: false,
+          },
+        ],
+      },
+    ],
+  }
+}

@@ -1,0 +1,161 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">BIND DEVICE</text>
+        <text class="page-title">绑定设备</text>
+        <text class="page-subtitle">{{ pageState.bindInfo.overview }}</text>
+      </view>
+
+      <AppSection eyebrow="流程" title="标准步骤" subtitle="先固化接入流程，再逐步接入扫码和蓝牙能力">
+        <view v-for="(step, index) in pageState.bindInfo.steps" :key="step.title" class="step-row">
+          <view class="step-index">
+            <text class="step-index-text">{{ index + 1 }}</text>
+          </view>
+          <view class="step-copy">
+            <view class="row-between">
+              <text class="step-title">{{ step.title }}</text>
+              <view :class="'tone-pill tone-pill--' + step.statusTone">
+                <text :class="'tone-pill-text tone-pill-text--' + step.statusTone">{{ step.statusText }}</text>
+              </view>
+            </view>
+            <text class="step-desc">{{ step.description }}</text>
+          </view>
+        </view>
+      </AppSection>
+
+      <AppSection eyebrow="入口" title="绑定方式" subtitle="页面只负责展示，真正的平台能力建议继续下沉到独立模块">
+        <view v-for="item in pageState.bindInfo.methods" :key="item.title" class="method-card">
+          <view :class="'tone-pill tone-pill--' + item.tone + ' method-card-pill'">
+            <text :class="'tone-pill-text tone-pill-text--' + item.tone">{{ item.actionLabel }}</text>
+          </view>
+          <text class="method-title">{{ item.title }}</text>
+          <text class="method-desc">{{ item.description }}</text>
+          <text class="method-helper">{{ item.helper }}</text>
+        </view>
+      </AppSection>
+
+      <view class="surface-card">
+        <text class="surface-title">实施建议</text>
+        <text class="surface-subtitle">{{ pageState.bindInfo.supportText }}</text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchBindPageData } from '@/src/services/device.uts'
+import { BindPageData, createEmptyBindPageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  bindInfo: createEmptyBindPageData() as BindPageData,
+} as DeviceBindPageState)
+
+type DeviceBindPageState = {
+  loading: boolean
+  bindInfo: BindPageData
+}
+
+async function loadBindInfo() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const bindInfo = await fetchBindPageData({ orgId: currentOrgId.value })
+    const bindInfo = await fetchBindPageData()
+    pageState.bindInfo = bindInfo
+  } catch (error) {
+    uni.showToast({
+      title: '绑定信息加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+onLoad(() => {
+  loadBindInfo()
+})
+</script>
+
+<style lang="scss">
+.step-row {
+  flex-direction: row;
+  padding-top: 10rpx;
+  padding-bottom: 18rpx;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(213, 204, 190, 0.7);
+}
+
+.step-index {
+  width: 54rpx;
+  height: 54rpx;
+  margin-right: 18rpx;
+  border-radius: 27rpx;
+  align-items: center;
+  justify-content: center;
+  background-color: $app-primary;
+}
+
+.step-index-text {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.step-copy {
+  flex: 1;
+}
+
+.step-title {
+  flex: 1;
+  padding-right: 16rpx;
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.step-desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: $app-muted;
+}
+
+.method-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx 22rpx;
+  border-radius: 24rpx;
+  background-color: $app-surface;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(213, 204, 190, 0.8);
+}
+
+.method-card-pill {
+  align-self: flex-start;
+}
+
+.method-title {
+  margin-top: 18rpx;
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.method-desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: $app-text;
+}
+
+.method-helper {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: $app-muted;
+}
+</style>

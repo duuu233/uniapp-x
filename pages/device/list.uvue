@@ -1,0 +1,131 @@
+<template>
+  <scroll-view class="page-scroll" scroll-y="true">
+    <view class="page-shell">
+      <view class="hero-card">
+        <text class="page-kicker">DEVICE LIBRARY</text>
+        <text class="page-title">我的设备</text>
+        <text class="page-subtitle">{{ pageState.deviceData.overview }}</text>
+        <view class="tag-row">
+          <view v-for="tag in pageState.deviceData.tags" :key="tag" class="tag-chip">
+            <text class="tag-chip-text">{{ tag }}</text>
+          </view>
+        </view>
+      </view>
+
+      <AppSection eyebrow="清单" title="设备列表" subtitle="后续可在 service 层增加分页、筛选和关键字检索">
+        <view v-for="device in pageState.deviceData.devices" :key="device.id" class="device-row">
+          <view class="row-between">
+            <text class="device-name">{{ device.name }}</text>
+            <view :class="'tone-pill tone-pill--' + device.statusTone">
+              <text :class="'tone-pill-text tone-pill-text--' + device.statusTone">{{ device.status }}</text>
+            </view>
+          </view>
+          <text class="device-location">{{ device.location }}</text>
+          <view class="device-meta">
+            <text class="device-meta-text">{{ device.connection }}</text>
+            <text class="device-meta-divider">·</text>
+            <text class="device-meta-text">{{ device.battery }}</text>
+            <text class="device-meta-divider">·</text>
+            <text class="device-meta-text">{{ device.updatedAt }}</text>
+          </view>
+        </view>
+      </AppSection>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+import AppSection from '@/components/AppSection/AppSection.uvue'
+import { fetchDevicePageData } from '@/src/services/device.uts'
+import { DevicePageData, createEmptyDevicePageData } from '@/src/types/models.uts'
+
+const pageState = reactive({
+  loading: false,
+  deviceData: createEmptyDevicePageData() as DevicePageData,
+} as DeviceListPageState)
+
+type DeviceListPageState = {
+  loading: boolean
+  deviceData: DevicePageData
+}
+
+async function loadDeviceData() {
+  pageState.loading = true
+  try {
+    // 真实请求伪代码：
+    // const deviceData = await fetchDevicePageData({ pageNo: 1, keyword: keyword.value })
+    const deviceData = await fetchDevicePageData()
+    pageState.deviceData = deviceData
+  } catch (error) {
+    uni.showToast({
+      title: '设备列表加载失败',
+      icon: 'none',
+    })
+  }
+  pageState.loading = false
+}
+
+onLoad(() => {
+  loadDeviceData()
+})
+</script>
+
+<style lang="scss">
+.tag-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+
+.tag-chip {
+  margin-right: 12rpx;
+  margin-bottom: 12rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background-color: rgba(31, 75, 78, 0.06);
+}
+
+.tag-chip-text {
+  font-size: 22rpx;
+  color: $app-primary;
+}
+
+.device-row {
+  padding-top: 10rpx;
+  padding-bottom: 18rpx;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(213, 204, 190, 0.7);
+}
+
+.device-name {
+  flex: 1;
+  padding-right: 16rpx;
+  font-size: 30rpx;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.device-location {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: $app-muted;
+}
+
+.device-meta {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 12rpx;
+}
+
+.device-meta-text,
+.device-meta-divider {
+  font-size: 22rpx;
+  color: $app-muted;
+}
+
+.device-meta-divider {
+  margin-left: 8rpx;
+  margin-right: 8rpx;
+}
+</style>
